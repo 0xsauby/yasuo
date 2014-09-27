@@ -23,7 +23,7 @@
 /sflog/,./exploits/multi/http/sflog_upload_exec.rb
 /struts2-blank/example/HelloWorld.action,./exploits/multi/http/struts_code_exec_classloader.rb
 /mobilecartly/,./exploits/multi/http/mobilecartly_upload_exec.rb
-/mediawiki,./exploits/multi/http/mediawiki_thumb.rb
+/mediawiki/index.php?title=Special:UserLogin&returnto=Main_Page,./exploits/multi/http/mediawiki_thumb.rb
 /qdPM/,./exploits/multi/http/qdpm_upload_exec.rb
 /www/,./exploits/multi/http/webpagetest_upload_exec.rb
 /gestioip/,./exploits/multi/http/gestioip_exec.rb
@@ -97,7 +97,6 @@
 /_all_dbs,./auxiliary/scanner/couchdb/couchdb_enum.rb
 /sap/bc/soap/rfc,./auxiliary/scanner/sap/sap_soap_rfc_brute_login.rb
 /admin/index.jsp,./auxiliary/scanner/http/apache_activemq_source_disclosure.rb
-/mediawiki,./auxiliary/scanner/http/mediawiki_svg_fileaccess.rb
 /.svn/,./auxiliary/scanner/http/svn_wcdb_scanner.rb
 /bitweaver/,./auxiliary/scanner/http/bitweaver_overlay_type_traversal.rb
 /data/login,./auxiliary/scanner/http/dell_idrac.rb

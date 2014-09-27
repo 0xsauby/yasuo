@@ -32,14 +32,14 @@ require './resp200.rb'
 #IP_Address could be a single IP, a range of IPs or CIDR notation
 #PORT_Number could be a single port, multiple comma separated ports, range of ports, all (for 1-65535 ports), leave blank to scan the top 1000 ports
 puts "#########################################################################################"
-puts "##    ##    ###     ######  ##     ##  #######  
- ##  ##    ## ##   ##    ## ##     ## ##     ## 
-  ####    ##   ##  ##       ##     ## ##     ## 
-   ##    ##     ##  ######  ##     ## ##     ## 
-   ##    #########       ## ##     ## ##     ## 
-   ##    ##     ## ##    ## ##     ## ##     ## 
-   ##    ##     ##  ######   #######   #######  "
-puts "Welcome to Yasuo v1.0"
+puts "oooooo   oooo       .o.        .oooooo..o ooooo     ooo   .oooooo.   
+ `888.   .8'       .888.      d8P'    `Y8 `888'     `8'  d8P'  `Y8b  
+  `888. .8'       .88888.     Y88bo.       888       8  888      888 
+   `888.8'       .8' `888.     `ZY8888o.   888       8  888      888 
+    `888'       .88ooo8888.        `0Y88b  888       8  888      888 
+     888       .8'     `888.  oo     .d8P  `88.    .8'  `88b    d88' 
+    o888o     o88o     o8888o 88888888P'     `YbodP'     `Y8bood8P'"
+puts "Welcome to Yasuo v0.1"
 puts "Author: Saurabh Harit (@0xsauby) | Contribution & Coolness: Stephen Hall (@_stephen_h)"
 puts "#########################################################################################\n\n"
 
@@ -78,11 +78,6 @@ class Scan_and_parse
       @input_brute = input_brute.downcase
       @info = Array.new
 
-      #puts "The input range is #{@input_iprange}"
-      #puts "The port range is #{@input_portrange}"
-      #puts "The default port scan value is #{@input_portdefault}"
-      #puts "The all port scan value is #{@input_portall}"
-
     end
 
     def lamescan
@@ -114,7 +109,7 @@ class Scan_and_parse
     def lameparse
       fakepath = 'thisfilecanneverexistwtf.txt'
       if (File.exists?(@input_filename))
-        puts "Created nmap scan output file #{@input_filename}".red
+        puts "Using nmap scan output file #{@input_filename}"
         Nmap::XML.new(@input_filename) do |xml|
           xml.each_host do |host|
             openportcount = 0
@@ -167,23 +162,15 @@ class Scan_and_parse
       else
         puts "Please specify the correct filename and path\n\n"
       end
-  
-maxes = Array.new 
 
-#  @info.reduce([]) do |maxes, list|
-#    list.each_with_index do |value, index|
-#      maxes[index] = [(maxes[index] || 0), value.to_s.length].max
-#    end
-#    maxes
-#  end
-#	
-#  @info.each do |list|
-#    list.each_with_index do |value, index|
-#      print " #{value.to_s.rjust(maxes[index])},"
-#    end
-#    puts
-#  end
-
+      puts ""
+      puts ""
+      puts "--------------------------------------------"
+      puts "List of all applications found"
+      puts "--------------------------------------------"
+      @info.each do |host|
+        puts ("#{host}").green
+      end
     end
 
     def lamerequest
@@ -195,12 +182,8 @@ maxes = Array.new
       finaluri = ""
       resp = ""
       pathfile = 'default-path.csv'
-      resp200 = Array.new
-      resp200form = Array.new
-      resp401 = Array.new
       creds = Array.new
       $vulnappfound = false
-      #resp404 = Array.new
 
       puts "Enumerating vulnerable applications"
       puts "-------------------------------------\n"
@@ -237,9 +220,9 @@ maxes = Array.new
           case resp.code
             when "200"
               if (((resp.body.scan(/<form/i)).size != 0) and ((resp.body.scan(/login/i)).size != 0))
-                puts "Yasuo found - #{$finaluri}. Requires form based auth".red
+                puts "Yasuo found - #{$finaluri}. May require form based auth".green
                 if ((@input_brute == 'form') or (@input_brute == 'all'))
-                  puts "Double-checking if the application implements a login page and initiating login bruteforce attack, hold on tight...".red
+                  puts "Double-checking if the application implements a login page and initiating login bruteforce attack, hold on tight..."
                   loginformbrute = Httpformbrute.new()
                   creds = loginformbrute.burtebyforce($finaluri)
                 end
@@ -248,17 +231,17 @@ maxes = Array.new
                  creds = ["None","None"]
               end
 	      $vulnappfound = true
-              #@info.push([$finaluri, script, creds[0], creds[1]])
+              @info.push([$finaluri, script, creds[0], creds[1]])
               break
             when "401"
-    	        puts "Yasuo found - #{$finaluri}. Requires HTTP basic auth".red
+    	        puts "Yasuo found - #{$finaluri}. Requires HTTP basic auth".green
               if ((@input_brute == 'basic') or (@input_brute == 'all'))
                 puts "Initiating login bruteforce attack, hold on tight..."
                 creds = lameauthbrute($finaluri)
               end
-	      puts creds
+	      #puts creds
 	      $vulnappfound = true
-              #@info.push([$finaluri, script, creds[0], creds[1]])
+              @info.push([$finaluri, script, creds[0], creds[1]])
               break
             when "404"
               #puts "Not found"
@@ -274,6 +257,8 @@ maxes = Array.new
     def lameauthbrute(url401)
       url = URI.parse(url401)
       win = 0
+      user_found = "Not Found"
+      pass_found = "Not Found"
 
       File.open("users.txt", "r") do |fu|
         fu.each_line do |user|
@@ -289,17 +274,17 @@ maxes = Array.new
               if ((res != nil) and (res.code == "200" or res.code == "301"))
                 puts ("Yatta, found default login credentials - #{user.chomp} / #{pass.chomp}\n").green
                 win = 1
-		return user.chomp, pass.chomp
+                user_found = user.chomp
+		pass_found = pass.chomp
               end
             end
           end
         end
       end
       if(win == 0)
-	puts("Could not find default credentials, sucks".red) 
-        return "None", "None"
+	puts("Could not find default credentials, sucks".red)
       end
-
+      return user_found,pass_found
     end
 
   def httpsGETRequest(url, username="", password="")
