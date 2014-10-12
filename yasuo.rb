@@ -305,7 +305,7 @@ class Scan_and_parse
     rescue OpenSSL::SSL::SSLError
       puts "#{$url}: SSL Error, site might not use SSL"
       #exit #Saurabh - This exit breaks execution of the script. Remaining port and hosts will not be tested. All other exit statements should be commented as well.
-    rescue Timeout::Error, Errno::ECONNREFUSED, Errno::ECONNRESET
+    rescue Timeout::Error, Errno::ECONNREFUSED, Errno::ECONNRESET, SocketError
       puts "#{$url}: Connection timed out or reset."
       #exit
     end
@@ -329,7 +329,7 @@ class Scan_and_parse
     rescue OpenSSL::SSL::SSLError
       puts "#{$url}: SSL Error, site might not use SSL"
       #exit
-    rescue Timeout::Error, Errno::ECONNREFUSED, Errno::ECONNRESET
+    rescue Timeout::Error, Errno::ECONNREFUSED, Errno::ECONNRESET, SocketError
       puts "#{$url}: Connection timed out or reset."
       #exit
     end
