@@ -38,7 +38,7 @@
 /jenkins/,./exploits/multi/http/jenkins_script_console.rb
 /SiteScope/,./exploits/multi/http/hp_sitescope_issuesiebelcmd.rb
 /phptax/,./exploits/multi/http/phptax_exec.rb
-/AjaXplorer-2.5.5/,./exploits/multi/http/ajaxplorer_checkinstall_exec.rb
+/AjaXplorer-2.5.5/plugins/access.ssh/checkInstall.php,./exploits/multi/http/ajaxplorer_checkinstall_exec.rb
 /phpmyadmin/,./exploits/multi/http/phpmyadmin_preg_replace.rb
 /vtigercrm/,./exploits/multi/http/vtiger_soap_upload.rb
 /com_extplorer_2.1.0/,./exploits/multi/http/extplorer_upload_exec.rb
