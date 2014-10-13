@@ -42,3 +42,6 @@ The above command will perform port scan against 127.0.0.1 on ports 80, 8080, 44
 ./yasuo -f my_nmap_output.xml -b all
 
 The above command will parse the nmap output file "my_nmap_output.xml" and will brute-force login for all the applications that implement form-based and http basic authentication.
+
+##Tetris-style Program Flow
+![Alt text](./tetris-style-program-flow.JPG)
