@@ -22,10 +22,7 @@ thus serving pwnable targets on a silver platter.
 ##Setup / Install
 You would need to install the following gems:
 
-- gem install ruby-nmap
-- gem install net-http-persistent
-- gem install mechanize
-- gem install colorize
+- gem install ruby-nmap net-http-persistent mechanize colorize
 
 ##Details
 
