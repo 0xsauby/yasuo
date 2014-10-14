@@ -1,21 +1,34 @@
 #YASUO
 
 ##Description
+
 Yasuo is a ruby script that scans for vulnerable 3rd-party web applications.
 
-While working on a network security assessment (internal, external, redteam gigs etc.), we often come across vulnerable 3rd-party web applications or web front-ends that allow us to compromise the remote server by exploiting publicly known vulnerabilities. Some of the common & favorite applications are Apache Tomcat administrative interface, JBoss jmx-console, Hudson Jenkins and so on.
+While working on a network security assessment (internal, external, redteam
+gigs etc.), we often come across vulnerable 3rd-party web applications or web
+front-ends that allow us to compromise the remote server by exploiting publicly
+known vulnerabilities. Some of the common & favorite applications are Apache
+Tomcat administrative interface, JBoss jmx-console, Hudson Jenkins and so on.
 
-If you search through Exploit-db, there are over 10,000 remotely exploitable vulnerabilities that exist in tons of web applications/front-ends and could allow an attacker to completely compromise the back-end server. These vulnerabilities range from RCE to malicious file uploads to SQL injection to RFI/LFI etc.
+If you search through Exploit-db, there are over 10,000 remotely exploitable
+vulnerabilities that exist in tons of web applications/front-ends and could
+allow an attacker to completely compromise the back-end server. These
+vulnerabilities range from RCE to malicious file uploads to SQL injection to
+RFI/LFI etc.
 
-Yasuo is built to quickly scan the network for such vulnerable applications thus serving pwnable targets on a silver platter.
-
+Yasuo is built to quickly scan the network for such vulnerable applications
+thus serving pwnable targets on a silver platter.
 
 ##Setup / Install
 You would need to install the following gems:
 
-gem install ruby-nmap<br />gem install net-http-persistent<br />gem install mechanize<br />gem install colorize
+- gem install ruby-nmap
+- gem install net-http-persistent
+- gem install mechanize
+- gem install colorize
 
 ##Details
+
 Yasuo provides following command-line options:
 
 -r :: If you want Yasuo to perform port scan, use this switch to provide an IP address or IP range or an input file with new-line separated IP addresses
@@ -35,13 +48,21 @@ Yasuo provides following command-line options:
 -h :: Well, take a guess
 
 ##Examples
-./yasuo -r 127.0.0.1 -p 80,8080,443,8443 -b form
 
-The above command will perform port scan against 127.0.0.1 on ports 80, 8080, 443 and 8443 and will brute-force login for all the applications that implement form-based authentication.
+`./yasuo -r 127.0.0.1 -p 80,8080,443,8443 -b form`
 
-./yasuo -f my_nmap_output.xml -b all
+The above command will perform port scan against 127.0.0.1 on ports 80, 8080,
+443 and 8443 and will brute-force login for all the applications that implement
+form-based authentication.
 
-The above command will parse the nmap output file "my_nmap_output.xml" and will brute-force login for all the applications that implement form-based and http basic authentication.
+
+`./yasuo -f my_nmap_output.xml -b all`
+
+The above command will parse the nmap output file "my_nmap_output.xml" and will
+brute-force login for all the applications that implement form-based and http
+basic authentication.
+
 
 ##Tetris-style Program Flow
+
 ![Alt text](./tetris-style-program-flow.JPG)
