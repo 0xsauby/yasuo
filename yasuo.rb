@@ -50,7 +50,7 @@ class Scan_and_parse
 
   VERSION = '0.1'
 
-  def initialize(input_filename, input_iprange, input_portrange, input_portdefault, input_portall, input_brute)
+  def initialize(input_filename, input_iprange, input_portrange, input_portall, input_brute)
     begin
       require 'nmap/program'
     rescue LoadError
@@ -73,7 +73,6 @@ class Scan_and_parse
     @input_filename = input_filename
     @input_iprange = input_iprange
     @input_portrange = input_portrange
-    @input_portdefault = input_portdefault
     @input_portall = input_portall
     @input_brute = input_brute.downcase
     @info = Array.new
@@ -95,8 +94,6 @@ class Scan_and_parse
         nmap.ports = "1-65535"
       elsif @input_portrange != ''
         nmap.ports = @input_portrange
-      elsif @input_portdefault == true
-        nmap.top_ports = 1000
       end
 
       nmap.targets = @input_iprange
@@ -336,7 +333,6 @@ if __FILE__ == $0
   options.ip_range = ''
   options.port_range = ''
   options.no_ping = false
-  options.default_ports_top = false
   options.all_ports_all = false
   options.brute = ''
 
@@ -373,10 +369,6 @@ if __FILE__ == $0
       options.port_range = port_range
     end
 
-    opts.on("-D", "--default_ports", "Scan on Nmap top 1000 ports") do |default_ports|
-      options.default_ports_top = true
-    end
-
     opts.on("-A", "--all_ports", "Scan on all 65535 ports") do |all_ports|
       options.all_ports_all = true
     end
@@ -406,7 +398,7 @@ if __FILE__ == $0
   end
 
   # Passing the parsed options to the Scan and Parse class so that they can be used
-  letsgo = Scan_and_parse.new(options.input_file, options.ip_range, options.port_range, options.default_ports_top, options.all_ports_all,options.brute)
+  letsgo = Scan_and_parse.new(options.input_file, options.ip_range, options.port_range, options.all_ports_all,options.brute)
   # logic to determine if scan is performed
   if options.input_file.length > 1
     letsgo.lameparse

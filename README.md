@@ -36,8 +36,6 @@ Yasuo provides following command-line options:
 
 -p :: Use this switch to provide port number(s)/range
 
--D :: Use this switch to scan top 1000 ports. Standard nmap option.
-
 -A :: Use this switch to scan all the 65535 ports. Standard nmap option.
 
 -b [all/form/basic] :: If the discovered application implements authentication, use this switch to brute-force the auth. "all" will brute-force both form & http basic auth. "form" will only brute-force form-based auth. "basic" will only brute-force http basic auth.
