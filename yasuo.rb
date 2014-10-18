@@ -222,7 +222,7 @@ class Scan_and_parse
             puts "Yasuo found - #{$finaluri}. May require form based auth".green
             if ((@input_brute == 'form') or (@input_brute == 'all'))
               puts "Double-checking if the application implements a login page and initiating login bruteforce attack, hold on tight..."
-              creds = LoginFormBruteForcer::burtebyforce($finaluri)
+              creds = LoginFormBruteForcer::brutebyforce($finaluri)
             end
           else
             puts "Yasuo found - #{$finaluri}. No authentication required".green
@@ -255,7 +255,7 @@ class Scan_and_parse
     user_found = "Not Found"
     pass_found = "Not Found"
 
-    HttpFormBruteForcer::usernames_and_passwords.each do |user, pass|
+    LoginFormBruteForcer::usernames_and_passwords.each do |user, pass|
       if (url.scheme == "https")
         res = httpsGETRequest(url401, user.chomp, pass.chomp)
         sleep 0.5

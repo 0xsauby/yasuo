@@ -28,7 +28,7 @@ module LoginFormBruteForcer
   end
 
   # Attempts to bruteforce a login to supplied url.
-  def bruteforce(url)
+  def brutebyforce(url)
 		user_found = "Not Found"
 		pass_found = "Not Found"
 
