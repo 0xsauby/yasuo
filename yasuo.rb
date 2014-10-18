@@ -106,6 +106,7 @@ class Scan_and_parse
 
   def lameparse
     fakepath = 'thisfilecanneverexistwtf.txt'
+    fakedir = 'thisfilecanneverexistwtf/'
     if (File.exists?(@input_filename))
       puts "Using nmap scan output file #{@input_filename}"
       Nmap::XML.new(@input_filename) do |xml|
@@ -128,9 +129,11 @@ class Scan_and_parse
                 $ssl = true
                 $targeturi = "https://#{$thisip}:#{$portnum}"
                 $fakeuri = "https://#{$thisip}:#{$portnum}/#{fakepath}"
-                fakeresp = httpsGETRequest($fakeuri)
+                $fakediruri = "https://#{$thisip}:#{$portnum}/#{fakedir}"
+                fakeuriresp = httpsGETRequest($fakeuri)
+                fakedirresp = httpsGETRequest($fakediruri)
                 #next
-                if ((fakeresp != nil) and (fakeresp.code != '200') and (fakeresp.code != '401'))
+                if ((fakeuriresp != nil) and (fakeuriresp.code != '200') and (fakeuriresp.code != '401') and (fakedirresp != nil) and (fakedirresp.code != '200') and (fakedirresp.code != '401'))
                   lamerequest
                 else
                   puts "#{$targeturi} returns HTTP 200 or 401 for every requested resource. Ignoring it"
@@ -139,9 +142,11 @@ class Scan_and_parse
                 $ssl = false
                 $targeturi = "http://#{$thisip}:#{$portnum}"
                 $fakeuri = "http://#{$thisip}:#{$portnum}/#{fakepath}"
-                fakeresp = httpGETRequest($fakeuri)
+                $fakediruri = "http://#{$thisip}:#{$portnum}/#{fakedir}"
+                fakeuriresp = httpGETRequest($fakeuri)
+                fakedirresp = httpGETRequest($fakediruri)
                 #fakeresp will be null in case of an exception
-                if ((fakeresp != nil) and (fakeresp.code != '200') and (fakeresp.code != '401'))
+                if ((fakeuriresp != nil) and (fakeuriresp.code != '200') and (fakeuriresp.code != '401') and (fakedirresp != nil) and (fakedirresp.code != '200') and (fakedirresp.code != '401'))
                   lamerequest
                   if ($vulnappfound == false)
                     puts "Yasuo did not find any vulnerable application on #{$thisip}:#{$portnum}\n\n"
