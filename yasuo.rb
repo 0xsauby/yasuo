@@ -26,6 +26,7 @@ require "net/https"
 require "uri"
 require 'csv'
 require 'colorize'  #install gem
+require 'text-table'  #install gem
 require './resp200.rb'
 
 #puts("Usage: ruby testscan.rb IP_Address Port_Number\n
@@ -75,7 +76,7 @@ class Scan_and_parse
     @input_portrange = input_portrange
     @input_portall = input_portall
     @input_brute = input_brute.downcase
-    @info = Array.new
+    @info = Array.new([["URL to Application", "Potential Exploit", "Username", "Password"]])
 
   end
 
@@ -165,9 +166,7 @@ class Scan_and_parse
     puts "--------------------------------------------"
     puts "List of all applications found"
     puts "--------------------------------------------"
-    @info.each do |host|
-      puts ("#{host}").green
-    end
+    puts @info.to_table(:first_row_is_head => true)
   end
 
   def lamerequest
@@ -220,7 +219,9 @@ class Scan_and_parse
             if ((@input_brute == 'form') or (@input_brute == 'all'))
               puts "Double-checking if the application implements a login page and initiating login bruteforce attack, hold on tight..."
               creds = LoginFormBruteForcer::brutebyforce($finaluri)
-            end
+            else
+							creds = ["N/A", "N/A"]
+						end
           else
             puts "Yasuo found - #{$finaluri}. No authentication required".green
             creds = ["None","None"]
@@ -233,6 +234,8 @@ class Scan_and_parse
           if ((@input_brute == 'basic') or (@input_brute == 'all'))
             puts "Initiating login bruteforce attack, hold on tight..."
             creds = lameauthbrute($finaluri)
+					else
+						creds = ["N/A", "N/A"]
           end
           #puts creds
           $vulnappfound = true
