@@ -114,7 +114,7 @@ class Scan_and_parse
         xml.each_host do |host|
           openportcount = 0
           $vulnappfound = 0
-          puts "\n[Testing host - #{host.ip}]".red
+          puts "\n<<<Testing host - #{host.ip}>>>".red
           $thisip = "#{host.ip}"
           host.each_port do |port|
             if((("#{port.service}".include? "http") || ("#{port.service}" == "websm") || ("#{port.service}".include? "ssl")) && ("#{port.state}" == "open"))
@@ -171,13 +171,14 @@ class Scan_and_parse
 
     puts ""
     puts ""
-    puts "---------------------------------------------------"
-    puts "Yasuo discovered following vulnerable applications".red
-    puts "---------------------------------------------------"
+    puts "--------------------------------------------------------"
+    puts "<<<Yasuo discovered following vulnerable applications>>>".red
+    puts "--------------------------------------------------------"
     puts @info.to_table(:first_row_is_head => true)
   end
 
   def lamerequest(thefinalurls)
+    puts "\n<<<Randomizing target urls to avoid detection>>>".red
     thefinalurls = thefinalurls.shuffle   #Randomizing the array to distribute load. Go stealth or go home
     #puts "#{thefinalurls}"
 
@@ -189,8 +190,8 @@ class Scan_and_parse
     $vulnappfound = false
 
 
-    puts "\nEnumerating vulnerable applications".red
-    puts "-------------------------------------\n"
+    puts "\n<<<Enumerating vulnerable applications>>>".red
+    puts "-------------------------------------------\n"
 
     CSV.foreach(pathfile) do |row|
       defpath = "#{row[0].strip}"
