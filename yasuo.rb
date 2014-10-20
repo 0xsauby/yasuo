@@ -26,7 +26,7 @@ require "net/https"
 require "uri"
 require 'csv'
 require 'colorize'  #install gem
-require 'text-table'  #install gem
+require 'text-table'
 require './resp200.rb'
 
 #puts("Usage: ruby testscan.rb IP_Address Port_Number\n
@@ -107,13 +107,14 @@ class Scan_and_parse
   def lameparse
     fakepath = 'thisfilecanneverexistwtf.txt'
     fakedir = 'thisfilecanneverexistwtf/'
+    finalurls = Array.new
     if (File.exists?(@input_filename))
       puts "Using nmap scan output file #{@input_filename}"
       Nmap::XML.new(@input_filename) do |xml|
         xml.each_host do |host|
           openportcount = 0
           $vulnappfound = 0
-          puts "[Testing host - #{host.ip}]".red
+          puts "\n[Testing host - #{host.ip}]".red
           $thisip = "#{host.ip}"
           host.each_port do |port|
             if((("#{port.service}".include? "http") || ("#{port.service}" == "websm") || ("#{port.service}".include? "ssl")) && ("#{port.state}" == "open"))
@@ -123,7 +124,7 @@ class Scan_and_parse
               $portst = "#{port.state}"
               $portserv = "#{port.service}"
               puts "Discovered open port: #{$thisip}:#{$portnum}"
-              puts "--------------------------------------------"
+              #puts "--------------------------------------------"
               #Determine if the service is running SSL and begin to build appropriate URL
               if(("#{$portserv}".include?  "https") || ("#{$portserv}".include?  "ssl"))
                 $ssl = true
@@ -134,7 +135,7 @@ class Scan_and_parse
                 fakedirresp = httpsGETRequest($fakediruri)
                 #next
                 if ((fakeuriresp != nil) and (fakeuriresp.code != '200') and (fakeuriresp.code != '401') and (fakedirresp != nil) and (fakedirresp.code != '200') and (fakedirresp.code != '401'))
-                  lamerequest
+                  finalurls << $targeturi
                 else
                   puts "#{$targeturi} returns HTTP 200 or 401 for every requested resource. Ignoring it"
                 end
@@ -147,7 +148,7 @@ class Scan_and_parse
                 fakedirresp = httpGETRequest($fakediruri)
                 #fakeresp will be null in case of an exception
                 if ((fakeuriresp != nil) and (fakeuriresp.code != '200') and (fakeuriresp.code != '401') and (fakedirresp != nil) and (fakedirresp.code != '200') and (fakedirresp.code != '401'))
-                  lamerequest
+                  finalurls << $targeturi
                   if ($vulnappfound == false)
                     puts "Yasuo did not find any vulnerable application on #{$thisip}:#{$portnum}\n\n"
                   end
@@ -166,17 +167,19 @@ class Scan_and_parse
       puts "Please specify the correct filename and path\n\n"
     end
 
+    lamerequest(finalurls)
+
     puts ""
     puts ""
-    puts "--------------------------------------------"
-    puts "List of all applications found"
-    puts "--------------------------------------------"
+    puts "---------------------------------------------------"
+    puts "Yasuo discovered following vulnerable applications".red
+    puts "---------------------------------------------------"
     puts @info.to_table(:first_row_is_head => true)
   end
 
-  def lamerequest
-    #puts "Discovered open port: #{$thisip}:#{$portnum}"
-    #puts "--------------------------------------------"
+  def lamerequest(thefinalurls)
+    thefinalurls = thefinalurls.shuffle   #Randomizing the array to distribute load. Go stealth or go home
+    #puts "#{thefinalurls}"
 
     #Reading and processing the default path file
     defpath = ""
@@ -185,70 +188,74 @@ class Scan_and_parse
     creds = Array.new
     $vulnappfound = false
 
-    puts "Enumerating vulnerable applications"
+
+    puts "\nEnumerating vulnerable applications".red
     puts "-------------------------------------\n"
 
     CSV.foreach(pathfile) do |row|
-      defpath = "#{row[0].strip}"   #changing row[1] to row[0] based on the new defalt-path file format
+      defpath = "#{row[0].strip}"
       script = row[1]
-      $finaluri = "#{$targeturi}#{defpath}"
-      #puts "Testing ----> #{$finaluri}"
-      #If the service is running SSL set the use_ssl variable to true.
-      if($ssl == true)
-        resp = httpsGETRequest($finaluri)
-        if ((resp != nil) and (resp.code == "301"))
-          if ("#{resp.header['location']}".include? "http")
-            resp = httpsGETRequest(resp.header['location'])
-          else
-            resp = httpsGETRequest("#{$targeturi}" + resp.header['location'])
-          end
-        end
-      else
-        resp = httpGETRequest($finaluri)
-        if ((resp != nil) and (resp.code == "301"))
-          #location header may contain absolute or relative path; hence this check
-          if ("#{resp.header['location']}".include? "http")
-            resp = httpGETRequest(resp.header['location'])
-          else
-            resp = httpGETRequest("#{$targeturi}" + resp.header['location'])
-          end
-        end
-      end
-
-      if (resp != nil)
-        #puts "Testing ----> #{$finaluri}"  #saurabh: comment this for less verbose output
-        case resp.code
-        when "200"
-          if (((resp.body.scan(/<form/i)).size != 0) and ((resp.body.scan(/login/i)).size != 0))
-            puts "Yasuo found - #{$finaluri}. May require form based auth".green
-            if ((@input_brute == 'form') or (@input_brute == 'all'))
-              puts "Double-checking if the application implements a login page and initiating login bruteforce attack, hold on tight..."
-              creds = LoginFormBruteForcer::brutebyforce($finaluri)
+      thefinalurls.each_with_index do |url, myindex|
+        attackurl = url + defpath
+        puts "Testing ----> ".red + "#{attackurl}"  #saurabh: comment this for less verbose output
+        if("#{attackurl}".include?  "https")
+          resp = httpsGETRequest(attackurl)
+          if ((resp != nil) and (resp.code == "301"))
+            if ("#{resp.header['location']}".include? "http")
+              resp = httpsGETRequest(resp.header['location'])
             else
-							creds = ["N/A", "N/A"]
-						end
-          else
-            puts "Yasuo found - #{$finaluri}. No authentication required".green
-            creds = ["None","None"]
+              resp = httpsGETRequest("#{attackurl}" + resp.header['location'])
+            end
           end
-          $vulnappfound = true
-          @info.push([$finaluri, script, creds[0], creds[1]])
-          break
-        when "401"
-          puts "Yasuo found - #{$finaluri}. Requires HTTP basic auth".green
-          if ((@input_brute == 'basic') or (@input_brute == 'all'))
-            puts "Initiating login bruteforce attack, hold on tight..."
-            creds = lameauthbrute($finaluri)
-					else
-						creds = ["N/A", "N/A"]
+        else
+          resp = httpGETRequest(attackurl)
+          if ((resp != nil) and (resp.code == "301"))
+            #location header may contain absolute or relative path; hence this check
+            if ("#{resp.header['location']}".include? "http")
+              resp = httpGETRequest(resp.header['location'])
+            else
+              resp = httpGETRequest("#{attackurl}" + resp.header['location'])
+            end
           end
-          #puts creds
-          $vulnappfound = true
-          @info.push([$finaluri, script, creds[0], creds[1]])
-          break
-        when "404"
-          #puts "Not found"
-          next
+        end
+
+        if (resp != nil)
+          #puts "Testing ----> ".red + "#{attackurl}"
+          case resp.code
+          when "200"
+            thefinalurls.delete_at(myindex)
+            if (((resp.body.scan(/<form/i)).size != 0) and ((resp.body.scan(/login/i)).size != 0))
+              puts "Yasuo found - #{attackurl}. May require form based auth".green
+              if ((@input_brute == 'form') or (@input_brute == 'all'))
+                puts "Double-checking if the application implements a login page and initiating login bruteforce attack, hold on tight..."
+                creds = LoginFormBruteForcer::brutebyforce(attackurl)
+              else
+                creds = ["N/A", "N/A"]
+              end
+            else
+              puts "Yasuo found - #{attackurl}. No authentication required".green
+              creds = ["None","None"]
+            end
+            $vulnappfound = true
+            @info.push([attackurl, script, creds[0], creds[1]])
+            break
+          when "401"
+            thefinalurls.delete_at(myindex)
+            puts "Yasuo found - #{attackurl}. Requires HTTP basic auth".green
+            if ((@input_brute == 'basic') or (@input_brute == 'all'))
+              puts "Initiating login bruteforce attack, hold on tight..."
+              creds = lameauthbrute(attackurl)
+            else
+              creds = ["N/A", "N/A"]
+            end
+            #puts creds
+            $vulnappfound = true
+            @info.push([attackurl, script, creds[0], creds[1]])
+            break
+          when "404"
+            #puts "Not found"
+            next
+          end
         end
       end
     end
@@ -345,7 +352,7 @@ if __FILE__ == $0
   options.brute = ''
 
 
-  OptionParser.new do |opts|
+  opts = OptionParser.new do |opts|
     opts.banner = "Yasuo #{Scan_and_parse::VERSION}"
 
     opts.on("-f", "--file [FILE]", "Nmap output in xml format") do |file|
@@ -395,7 +402,8 @@ if __FILE__ == $0
       exit
     end
 
-  end.parse!(ARGV)
+  end
+  opts.parse!(ARGV)
 
   unless options.input_file.length > 1 || options.ip_range.length > 1
     puts "To perform the Nmap scan, use the option -r to provide the network range\n"
@@ -417,4 +425,3 @@ if __FILE__ == $0
     letsgo.lameparse
   end
 end
-
