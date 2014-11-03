@@ -85,7 +85,7 @@ class Scan_and_parse
     $stdout.reopen("/dev/null", "w")
     Nmap::Program.scan do |nmap|
       nmap.syn_scan = true
-      nmap.service_scan = false
+      nmap.service_scan = true
       nmap.xml = 'nmap_output_' + Time.now.gmtime.to_s.gsub(/\W/,'') + '.xml'
       nmap.os_fingerprint = false
       nmap.verbose = false
