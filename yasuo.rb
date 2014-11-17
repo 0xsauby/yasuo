@@ -27,7 +27,7 @@ require "uri"
 require 'csv'
 require 'colorize'  #install gem
 require 'text-table'
-require './resp200.rb'
+require File.dirname(File.realpath(__FILE__)) + '/resp200.rb'
 
 #puts("Usage: ruby testscan.rb IP_Address Port_Number\n
 #IP_Address could be a single IP, a range of IPs or CIDR notation
