@@ -255,17 +255,21 @@ class Scanner
     return user_found,pass_found
   end
 
-  def httpsGETRequest(url, username="", password="")
+  def httpGETRequest(url, username="", password="", use_ssl=false)
     uri = URI.parse(url)
     http = Net::HTTP.new(uri.host, uri.port)
     http.open_timeout = 5   #saurabh
     http.read_timeout = 5   #saurabh
-    http.use_ssl = true
-    http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+    if use_ssl
+      http.use_ssl = true
+      http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+    end
+
     request = Net::HTTP::Get.new(uri.request_uri)
     if (username != "" and password != "")
       request.basic_auth username, password
     end
+
     begin
       resp = http.request(request)
     rescue IOError, Errno::EINVAL, EOFError, Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, Net::ProtocolError, Net::HTTP::Persistent::Error
@@ -281,28 +285,8 @@ class Scanner
     return resp
   end
 
-  def httpGETRequest(url, username="", password="")
-    uri = URI.parse(url)
-    http = Net::HTTP.new(uri.host, uri.port)
-    http.open_timeout = 5   #saurabh
-    http.read_timeout = 5   #saurabh
-    request = Net::HTTP::Get.new(uri.request_uri)
-    if (username != "" and password != "")
-      request.basic_auth username, password
-    end
-    begin
-      resp = http.request(request)
-    rescue IOError, Errno::EINVAL, EOFError, Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, Net::ProtocolError, Net::HTTP::Persistent::Error
-      #exit
-    rescue OpenSSL::SSL::SSLError
-      puts "#{$url}: SSL Error, site might not use SSL"
-      #exit
-    rescue Timeout::Error, Errno::ECONNREFUSED, Errno::ECONNRESET, SocketError
-      puts "#{$url}: Connection timed out or reset."
-      #exit
-    end
-
-    return resp
+  def httpsGETRequest(url, username="", password="")
+    return httpGETRequest(url, username, password, true)
   end
 
   def run
