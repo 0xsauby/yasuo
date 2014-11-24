@@ -116,55 +116,41 @@ private
     fakepath = 'thisfilecanneverexistwtf.txt'
     fakedir = 'thisfilecanneverexistwtf/'
 
-    finalurls = []
+    final_urls = []
 
     puts "Using nmap scan output file #{@nmap_filename}"
 
     Nmap::XML.new(@nmap_filename) do |xml|
       xml.each_host do |host|
-        openportcount = 0
-        $vulnappfound = 0
         puts "\n<<<Testing host - #{host.ip}>>>".red
-        $thisip = "#{host.ip}"
-        host.each_port do |port|
-          if((("#{port.service}".include? "http") || ("#{port.service}" == "websm") || ("#{port.service}".include? "ssl")) && ("#{port.state}" == "open"))
-            openportcount += 1
-            $portnum = "#{port.number}"
-            $portproto = "#{port.protocol}"
-            $portst = "#{port.state}"
-            $portserv = "#{port.service}"
-            puts "Discovered open port: #{$thisip}:#{$portnum}"
 
-            #Determine if the service is running SSL and begin to build appropriate URL
-            if(("#{$portserv}".include?  "https") || ("#{$portserv}".include?  "ssl"))
-              $ssl = true
-              $targeturi = "https://#{$thisip}:#{$portnum}"
-              $fakeuri = "https://#{$thisip}:#{$portnum}/#{fakepath}"
-              $fakediruri = "https://#{$thisip}:#{$portnum}/#{fakedir}"
-              fakeuriresp = httpGETRequest($fakeuri, :use_ssl => true)
-              fakedirresp = httpGETRequest($fakediruri, :use_ssl => true)
-              #next
-              if ((fakeuriresp != nil) and (fakeuriresp.code != '200') and (fakeuriresp.code != '401') and (fakedirresp != nil) and (fakedirresp.code != '200') and (fakedirresp.code != '401'))
-                finalurls << $targeturi
-              else
-                puts "#{$targeturi} returns HTTP 200 or 401 for every requested resource. Ignoring it"
-              end
+        openportcount = 0
+        host.each_port do |port|
+          open_port = "#{port.state}" == "open"
+          web_service = "#{port.service}".include?("http") or port.service == "websm" or "#{port.service}".include?("ssl")
+          if open_port and web_service
+            openportcount += 1
+
+            port_number = "#{port.number}"
+            port_service = "#{port.service}"
+
+            puts "Discovered open port: #{host.ip}:#{port_number}"
+
+            # Determine if the service is running SSL and begin to build appropriate URL
+            use_ssl    = port_service.include?("https") or port_service.include?("ssl")
+            prefix     = use_ssl ? "https" : "http"
+            targeturi  = "#{prefix}://#{host.ip}:#{port_number}"
+            fakeuri    = "#{targeturi}/#{fakepath}"
+            fakediruri = "#{targeturi}/#{fakedir}"
+
+            fake_uri_resp = httpGETRequest(fakeuri, :use_ssl => true)
+            fake_dir_resp = httpGETRequest(fakediruri, :use_ssl => true)
+
+            if (fake_uri_resp and fake_uri_resp.code != '200' and fake_uri_resp.code != '401' and
+                fake_dir_resp and fake_dir_resp.code != '200' and fake_dir_resp.code != '401')
+              final_urls << targeturi
             else
-              $ssl = false
-              $targeturi = "http://#{$thisip}:#{$portnum}"
-              $fakeuri = "http://#{$thisip}:#{$portnum}/#{fakepath}"
-              $fakediruri = "http://#{$thisip}:#{$portnum}/#{fakedir}"
-              fakeuriresp = httpGETRequest($fakeuri)
-              fakedirresp = httpGETRequest($fakediruri)
-              #fakeresp will be null in case of an exception
-              if ((fakeuriresp != nil) and (fakeuriresp.code != '200') and (fakeuriresp.code != '401') and (fakedirresp != nil) and (fakedirresp.code != '200') and (fakedirresp.code != '401'))
-                finalurls << $targeturi
-                if ($vulnappfound == false)
-                  puts "Yasuo did not find any vulnerable application on #{$thisip}:#{$portnum}\n\n"
-                end
-              else
-                puts "#{$targeturi} returns HTTP 200 or 401 for every requested resource. Ignoring it"
-              end
+              puts "#{targeturi} returns HTTP 200 or 401 for every requested resource. Ignoring it"
             end
           end
         end
@@ -176,7 +162,7 @@ private
       end
     end
 
-    lamerequest(finalurls)
+    lamerequest(final_urls)
 
     puts ""
     puts ""
@@ -195,7 +181,6 @@ private
     resp = ""
     pathfile = @paths_filename
     creds = Array.new
-    $vulnappfound = false
 
     puts "\n<<<Enumerating vulnerable applications>>>".red
     puts "-------------------------------------------\n"
@@ -243,7 +228,6 @@ private
               puts "Yasuo found - #{attackurl}. No authentication required".green
               creds = ["None","None"]
             end
-            $vulnappfound = true
             @info.push([attackurl, script, creds[0], creds[1]])
             break
           when "401"
@@ -255,8 +239,6 @@ private
             else
               creds = ["N/A", "N/A"]
             end
-            #puts creds
-            $vulnappfound = true
             @info.push([attackurl, script, creds[0], creds[1]])
             break
           when "404"
