@@ -66,22 +66,42 @@ class Scanner
     ]
   end
 
-  def lamescan
+  def run
+    # logic to determine if scan is performed
+    if @nmap_filename.empty?
+      puts "Initiating port scan"
+      puts "----------------------\n"
+      nmap_scan
+    end
+    lameparse
+  end
+
+private
+
+  # Runs an nmap scan, storing the result of the scan to the file system.
+  # We currently do not clean up these files after our program has finished
+  # running.
+  def nmap_scan
+    # silence sdtout for the duration of this method
     orig_std_out = $stdout.clone
     $stdout.reopen("/dev/null", "w")
+
     Nmap::Program.scan do |nmap|
       nmap.syn_scan = true
       nmap.service_scan = true
       nmap.xml = 'nmap_output_' + Time.now.gmtime.to_s.gsub(/\W/,'') + '.xml'
       nmap.os_fingerprint = false
       nmap.verbose = false
+
       nmap.targets = @target_ips_range
 
-      # Logic for determining which ports are to be scanned by the script
-      if @scan_all_ports
-        nmap.ports = "1-65535"
+      # Logic for determining which ports are to be scanned by the script.
+      # TODO: what happens if neither flag is provided? Should we default to
+      #       all? (drop that flag.)
+      nmap.ports = if @scan_all_ports
+        "1-65535"
       elsif not @scan_port_range.empty?
-        nmap.ports = @scan_port_range
+        @scan_port_range
       end
 
       # Set the input filename so that when lameparse is called it will scan the
@@ -309,16 +329,6 @@ class Scanner
   def httpsGETRequest(url, username="", password="")
     return httpGETRequest(url, username, password, true)
   end
-
-  def run
-    # logic to determine if scan is performed
-    if @nmap_filename.empty?
-      puts "Initiating port scan"
-      puts "----------------------\n"
-      lamescan
-    end
-    lameparse
-  end
 end
 
 
@@ -413,12 +423,8 @@ if __FILE__ == $0
     exit
   end
 
-  if not File.exists?(options.nmap_file)
-    puts "Nmap scan file not found.".red
-    exit
-  end
 
-  if not options.brute.empty? and (not File.exists?('users.txt') or not File.exists?('pass.txt') == false)
+  if not options.brute.empty? and (not File.exists?('users.txt') or not File.exists?('pass.txt'))
     puts "If you want to do bruteforcing please ensure you have both files users.txt and pass.txt".red
     exit
   end
