@@ -195,7 +195,7 @@ class Scanner
               puts "Yasuo found - #{attackurl}. May require form based auth".green
               if ((@input_brute == 'form') or (@input_brute == 'all'))
                 puts "Double-checking if the application implements a login page and initiating login bruteforce attack, hold on tight..."
-                creds = LoginFormBruteForcer::brutebyforce(attackurl)
+                creds = LoginFormBruteForcer::brute_by_force(attackurl)
               else
                 creds = ["N/A", "N/A"]
               end
@@ -242,7 +242,7 @@ class Scanner
         res = httpGETRequest(url401, user.chomp, pass.chomp)
         sleep 0.5
       end
-      if ((res != nil) and (res.code == "200" or res.code == "301"))
+      if (res != nil) and (res.code == "200" or res.code == "301")
         puts ("Yatta, found default login credentials - #{user.chomp} / #{pass.chomp}\n").green
         win = 1
         user_found = user.chomp
@@ -250,9 +250,9 @@ class Scanner
       end
     end
     if win == 0
-      puts("Could not find default credentials, sucks".red)
+      puts "Could not find default credentials, sucks".red
     end
-    return user_found,pass_found
+    return user_found, pass_found
   end
 
   def httpGETRequest(url, username="", password="", use_ssl=false)
