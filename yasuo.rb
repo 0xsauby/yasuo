@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#
+
 ## == Author
 ## Author::  Saurabh Hariti [0xsauby]
 ## Copyright:: Copyright (c) 2014 Saurabh Harit
@@ -38,14 +38,32 @@ VERSION = '0.1'
 
 
 class Scanner
-  def initialize(paths_filename, nmap_filename, input_iprange, input_portrange, input_portall, input_brute)
+  def initialize(paths_filename, nmap_filename, target_ips_range, scan_port_range, scan_all_ports, brute_force_mode)
+    # vulnerable applications signatures
     @paths_filename = paths_filename
+
+    # nmap XML file
     @nmap_filename = nmap_filename
-    @input_iprange = input_iprange
-    @input_portrange = input_portrange
-    @input_portall = input_portall
-    @input_brute = input_brute.downcase
-    @info = Array.new([["URL to Application", "Potential Exploit", "Username", "Password"]])
+
+    # the range of IPs to scan
+    @target_ips_range = target_ips_range
+
+    # scan the given range of ports
+    @scan_port_range = scan_port_range
+
+    # scan all ports
+    @input_port_all = scan_all_ports
+
+    # how should the scanner brute force applications that are found:
+    #  - form (attempt to login to login forms found on pages)
+    #  - basic (just use HTTP basic auth)
+    #  - both
+    @brute_force_mode = brute_force_mode.downcase
+
+    # stores vulnerable applications that were found
+    @info = [
+      ["URL to Application", "Potential Exploit", "Username", "Password"]
+    ]
   end
 
   def lamescan
@@ -59,13 +77,13 @@ class Scanner
       nmap.verbose = false
 
       # Logic for determining which ports are to be scanned by the script
-      if @input_portall == true
+      if @scan_all_ports
         nmap.ports = "1-65535"
-      elsif @input_portrange != ''
-        nmap.ports = @input_portrange
+      elsif not @scan_port_range.empty?
+        nmap.ports = @scan_port_range
       end
 
-      nmap.targets = @input_iprange
+      nmap.targets = @target_ips_range
 
       # Set the input filename so that when lameparse is called it will scan the
       # default scan output.
@@ -77,7 +95,8 @@ class Scanner
   def lameparse
     fakepath = 'thisfilecanneverexistwtf.txt'
     fakedir = 'thisfilecanneverexistwtf/'
-    finalurls = Array.new
+
+    finalurls = []
 
     puts "Using nmap scan output file #{@nmap_filename}"
 
@@ -129,8 +148,10 @@ class Scanner
             end
           end
         end
-        if openportcount == 0
-          puts "Either all the ports were closed or Yasuo did not find any web-based services. Check #{@nmap_filename} for scan output\n".red
+
+        if openportcount.zero?
+          puts "Either all the ports were closed or Yasuo did not find any web-based services.\n".red
+          puts "Check #{@nmap_filename} for scan output\n".red
         end
       end
     end
@@ -193,7 +214,7 @@ class Scanner
             thefinalurls.delete_at(myindex)
             if (((resp.body.scan(/<form/i)).size != 0) and ((resp.body.scan(/login/i)).size != 0))
               puts "Yasuo found - #{attackurl}. May require form based auth".green
-              if ((@input_brute == 'form') or (@input_brute == 'all'))
+              if @brute_force_mode == 'form' or @brute_force_mode == 'all'
                 puts "Double-checking if the application implements a login page and initiating login bruteforce attack, hold on tight..."
                 creds = LoginFormBruteForcer::brute_by_force(attackurl)
               else
@@ -315,11 +336,11 @@ if __FILE__ == $0
   puts "#########################################################################################\n\n"
 
   options = OpenStruct.new
-  options.input_file = ''
+  options.nmap_file = ''
   options.ip_range = ''
   options.port_range = ''
   options.no_ping = false
-  options.all_ports_all = false
+  options.all_ports = false
   options.brute = ''
   options.paths_file = 'default-path.csv'  # TODO: add option to set this value
 
@@ -331,7 +352,7 @@ if __FILE__ == $0
     end
 
     opts.on("-f", "--file [FILE]", "Nmap output in xml format") do |file|
-      options.input_file = file
+      options.nmap_file = file
     end
 
     opts.on("-r", "--range [RANGE]", "IP Range to Scan") do |iprange|
@@ -360,7 +381,7 @@ if __FILE__ == $0
     end
 
     opts.on("-A", "--all_ports", "Scan on all 65535 ports") do |all_ports|
-      options.all_ports_all = true
+      options.all_ports = true
     end
 
     opts.on("-b", "--brute [all/form/basic]", "Bruteforce") do |brute|
@@ -378,7 +399,7 @@ if __FILE__ == $0
     end
   end.parse!(ARGV)
 
-  unless options.input_file.length > 1 || options.ip_range.length > 1
+  unless options.nmap_file.length > 1 || options.ip_range.length > 1
     puts "To perform the Nmap scan, use the option -r to provide the network range.\n"
     puts "Additionally, also provide the port number(s) or choose either option -pA \n"
     puts "to scan all ports or option -pD to scan top 1000 ports.\n\n"
@@ -392,7 +413,7 @@ if __FILE__ == $0
     exit
   end
 
-  if not File.exists?(options.input_file)
+  if not File.exists?(options.nmap_file)
     puts "Nmap scan file not found.".red
     exit
   end
@@ -404,11 +425,11 @@ if __FILE__ == $0
 
   # Let's go!
   Scanner.new(
-    options.paths,
-    options.input_file,
+    options.paths_file,
+    options.nmap_file,
     options.ip_range,
     options.port_range,
-    options.all_ports_all,
+    options.all_ports,
     options.brute
   ).run()
 end
