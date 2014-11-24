@@ -18,66 +18,34 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-require 'nmap/program'
-require 'nmap/xml'
+
+require "colorize"
+require "csv"
 require "net/http"
-require 'net/http/persistent' #install gem
+require "net/http/persistent"
 require "net/https"
+require "nmap/program"
+require "nmap/xml"
+require "optparse"
+require "ostruct"
+require "text-table"
 require "uri"
-require 'csv'
-require 'colorize'  #install gem
-require 'text-table'
+
 require File.dirname(File.realpath(__FILE__)) + '/resp200.rb'
 
-#puts("Usage: ruby testscan.rb IP_Address Port_Number\n
-#IP_Address could be a single IP, a range of IPs or CIDR notation
-#PORT_Number could be a single port, multiple comma separated ports, range of ports, all (for 1-65535 ports), leave blank to scan the top 1000 ports
-puts "#########################################################################################"
-puts "oooooo   oooo       .o.        .oooooo..o ooooo     ooo   .oooooo.
- `888.   .8'       .888.      d8P'    `Y8 `888'     `8'  d8P'  `Y8b
-  `888. .8'       .88888.     Y88bo.       888       8  888      888
-   `888.8'       .8' `888.     `ZY8888o.   888       8  888      888
-    `888'       .88ooo8888.        `0Y88b  888       8  888      888
-     888       .8'     `888.  oo     .d8P  `88.    .8'  `88b    d88'
-    o888o     o88o     o8888o 88888888P'     `YbodP'     `Y8bood8P'"
-puts "Welcome to Yasuo v0.1"
-puts "Author: Saurabh Harit (@0xsauby) | Contribution & Coolness: Stephen Hall (@_stephen_h)"
-puts "#########################################################################################\n\n"
 
-#$fileout = $stdout.clone
-#$stdout.reopen('yasuo_output.txt')
+VERSION = '0.1'
 
-class Scan_and_parse
 
-  VERSION = '0.1'
-
-  def initialize(input_filename, input_iprange, input_portrange, input_portall, input_brute)
-    begin
-      require 'nmap/program'
-    rescue LoadError
-      puts 'could not load the ruby-nmap library'
-      puts 'Try gem install ruby-nmap'
-      exit
-    end
-
-    if (File.exists?('default-path.csv') == false)
-      puts "Yasou needs the default-path.csv file to run".red
-      exit
-    end
-    if(input_brute != "")
-      if ((File.exists?('users.txt') == false) or (File.exists?('pass.txt') == false))
-        puts "If you want to do bruteforcing please ensure you have both files users.txt and pass.txt".red
-        exit
-      end
-    end
-
-    @input_filename = input_filename
+class Scanner
+  def initialize(paths_filename, nmap_filename, input_iprange, input_portrange, input_portall, input_brute)
+    @paths_filename = paths_filename
+    @nmap_filename = nmap_filename
     @input_iprange = input_iprange
     @input_portrange = input_portrange
     @input_portall = input_portall
     @input_brute = input_brute.downcase
     @info = Array.new([["URL to Application", "Potential Exploit", "Username", "Password"]])
-
   end
 
   def lamescan
@@ -90,7 +58,7 @@ class Scan_and_parse
       nmap.os_fingerprint = false
       nmap.verbose = false
 
-      #Logic for determining which ports are to be scanned by the script
+      # Logic for determining which ports are to be scanned by the script
       if @input_portall == true
         nmap.ports = "1-65535"
       elsif @input_portrange != ''
@@ -98,8 +66,10 @@ class Scan_and_parse
       end
 
       nmap.targets = @input_iprange
-      #Set the input filename so that when lameparse is called it will scan the default scan output.
-      @input_filename = "#{nmap.xml}"
+
+      # Set the input filename so that when lameparse is called it will scan the
+      # default scan output.
+      @nmap_filename = "#{nmap.xml}"
     end
     $stdout.reopen(orig_std_out)
   end
@@ -108,63 +78,61 @@ class Scan_and_parse
     fakepath = 'thisfilecanneverexistwtf.txt'
     fakedir = 'thisfilecanneverexistwtf/'
     finalurls = Array.new
-    if (File.exists?(@input_filename))
-      puts "Using nmap scan output file #{@input_filename}"
-      Nmap::XML.new(@input_filename) do |xml|
-        xml.each_host do |host|
-          openportcount = 0
-          $vulnappfound = 0
-          puts "\n<<<Testing host - #{host.ip}>>>".red
-          $thisip = "#{host.ip}"
-          host.each_port do |port|
-            if((("#{port.service}".include? "http") || ("#{port.service}" == "websm") || ("#{port.service}".include? "ssl")) && ("#{port.state}" == "open"))
-              openportcount += 1
-              $portnum = "#{port.number}"
-              $portproto = "#{port.protocol}"
-              $portst = "#{port.state}"
-              $portserv = "#{port.service}"
-              puts "Discovered open port: #{$thisip}:#{$portnum}"
-              #puts "--------------------------------------------"
-              #Determine if the service is running SSL and begin to build appropriate URL
-              if(("#{$portserv}".include?  "https") || ("#{$portserv}".include?  "ssl"))
-                $ssl = true
-                $targeturi = "https://#{$thisip}:#{$portnum}"
-                $fakeuri = "https://#{$thisip}:#{$portnum}/#{fakepath}"
-                $fakediruri = "https://#{$thisip}:#{$portnum}/#{fakedir}"
-                fakeuriresp = httpsGETRequest($fakeuri)
-                fakedirresp = httpsGETRequest($fakediruri)
-                #next
-                if ((fakeuriresp != nil) and (fakeuriresp.code != '200') and (fakeuriresp.code != '401') and (fakedirresp != nil) and (fakedirresp.code != '200') and (fakedirresp.code != '401'))
-                  finalurls << $targeturi
-                else
-                  puts "#{$targeturi} returns HTTP 200 or 401 for every requested resource. Ignoring it"
+
+    puts "Using nmap scan output file #{@nmap_filename}"
+
+    Nmap::XML.new(@nmap_filename) do |xml|
+      xml.each_host do |host|
+        openportcount = 0
+        $vulnappfound = 0
+        puts "\n<<<Testing host - #{host.ip}>>>".red
+        $thisip = "#{host.ip}"
+        host.each_port do |port|
+          if((("#{port.service}".include? "http") || ("#{port.service}" == "websm") || ("#{port.service}".include? "ssl")) && ("#{port.state}" == "open"))
+            openportcount += 1
+            $portnum = "#{port.number}"
+            $portproto = "#{port.protocol}"
+            $portst = "#{port.state}"
+            $portserv = "#{port.service}"
+            puts "Discovered open port: #{$thisip}:#{$portnum}"
+            #puts "--------------------------------------------"
+            #Determine if the service is running SSL and begin to build appropriate URL
+            if(("#{$portserv}".include?  "https") || ("#{$portserv}".include?  "ssl"))
+              $ssl = true
+              $targeturi = "https://#{$thisip}:#{$portnum}"
+              $fakeuri = "https://#{$thisip}:#{$portnum}/#{fakepath}"
+              $fakediruri = "https://#{$thisip}:#{$portnum}/#{fakedir}"
+              fakeuriresp = httpsGETRequest($fakeuri)
+              fakedirresp = httpsGETRequest($fakediruri)
+              #next
+              if ((fakeuriresp != nil) and (fakeuriresp.code != '200') and (fakeuriresp.code != '401') and (fakedirresp != nil) and (fakedirresp.code != '200') and (fakedirresp.code != '401'))
+                finalurls << $targeturi
+              else
+                puts "#{$targeturi} returns HTTP 200 or 401 for every requested resource. Ignoring it"
+              end
+            else
+              $ssl = false
+              $targeturi = "http://#{$thisip}:#{$portnum}"
+              $fakeuri = "http://#{$thisip}:#{$portnum}/#{fakepath}"
+              $fakediruri = "http://#{$thisip}:#{$portnum}/#{fakedir}"
+              fakeuriresp = httpGETRequest($fakeuri)
+              fakedirresp = httpGETRequest($fakediruri)
+              #fakeresp will be null in case of an exception
+              if ((fakeuriresp != nil) and (fakeuriresp.code != '200') and (fakeuriresp.code != '401') and (fakedirresp != nil) and (fakedirresp.code != '200') and (fakedirresp.code != '401'))
+                finalurls << $targeturi
+                if ($vulnappfound == false)
+                  puts "Yasuo did not find any vulnerable application on #{$thisip}:#{$portnum}\n\n"
                 end
               else
-                $ssl = false
-                $targeturi = "http://#{$thisip}:#{$portnum}"
-                $fakeuri = "http://#{$thisip}:#{$portnum}/#{fakepath}"
-                $fakediruri = "http://#{$thisip}:#{$portnum}/#{fakedir}"
-                fakeuriresp = httpGETRequest($fakeuri)
-                fakedirresp = httpGETRequest($fakediruri)
-                #fakeresp will be null in case of an exception
-                if ((fakeuriresp != nil) and (fakeuriresp.code != '200') and (fakeuriresp.code != '401') and (fakedirresp != nil) and (fakedirresp.code != '200') and (fakedirresp.code != '401'))
-                  finalurls << $targeturi
-                  if ($vulnappfound == false)
-                    puts "Yasuo did not find any vulnerable application on #{$thisip}:#{$portnum}\n\n"
-                  end
-                else
-                  puts "#{$targeturi} returns HTTP 200 or 401 for every requested resource. Ignoring it"
-                end
+                puts "#{$targeturi} returns HTTP 200 or 401 for every requested resource. Ignoring it"
               end
             end
           end
-          if openportcount == 0
-            puts "Either all the ports were closed or Yasuo did not find any web-based services. Check #{@input_filename} for scan output\n".red
-          end
+        end
+        if openportcount == 0
+          puts "Either all the ports were closed or Yasuo did not find any web-based services. Check #{@nmap_filename} for scan output\n".red
         end
       end
-    else
-      puts "Please specify the correct filename and path\n\n"
     end
 
     lamerequest(finalurls)
@@ -180,15 +148,13 @@ class Scan_and_parse
   def lamerequest(thefinalurls)
     puts "\n<<<Randomizing target urls to avoid detection>>>".red
     thefinalurls = thefinalurls.shuffle   #Randomizing the array to distribute load. Go stealth or go home
-    #puts "#{thefinalurls}"
 
     #Reading and processing the default path file
     defpath = ""
     resp = ""
-    pathfile = 'default-path.csv'
+    pathfile = @paths_filename
     creds = Array.new
     $vulnappfound = false
-
 
     puts "\n<<<Enumerating vulnerable applications>>>".red
     puts "-------------------------------------------\n"
@@ -338,11 +304,31 @@ class Scan_and_parse
 
     return resp
   end
+
+  def run
+    # logic to determine if scan is performed
+    if @nmap_filename.empty?
+      puts "Initiating port scan"
+      puts "----------------------\n"
+      lamescan
+    end
+    lameparse
+  end
 end
 
+
 if __FILE__ == $0
-  require 'optparse'
-  require 'ostruct'
+  puts "#########################################################################################"
+  puts "oooooo   oooo       .o.        .oooooo..o ooooo     ooo   .oooooo.
+   `888.   .8'       .888.      d8P'    `Y8 `888'     `8'  d8P'  `Y8b
+    `888. .8'       .88888.     Y88bo.       888       8  888      888
+     `888.8'       .8' `888.     `ZY8888o.   888       8  888      888
+      `888'       .88ooo8888.        `0Y88b  888       8  888      888
+       888       .8'     `888.  oo     .d8P  `88.    .8'  `88b    d88'
+      o888o     o88o     o8888o 88888888P'     `YbodP'     `Y8bood8P'"
+  puts "Welcome to Yasuo v#{VERSION}"
+  puts "Author: Saurabh Harit (@0xsauby) | Contribution & Coolness: Stephen Hall (@_stephen_h)"
+  puts "#########################################################################################\n\n"
 
   options = OpenStruct.new
   options.input_file = ''
@@ -351,10 +337,14 @@ if __FILE__ == $0
   options.no_ping = false
   options.all_ports_all = false
   options.brute = ''
+  options.paths_file = 'default-path.csv'  # TODO: add option to set this value
 
+  OptionParser.new do |opts|
+    opts.banner = "Yasuo #{VERSION}"
 
-  opts = OptionParser.new do |opts|
-    opts.banner = "Yasuo #{Scan_and_parse::VERSION}"
+    opts.on("-s", "--path-signatures", "CSV file of vulnerable app signatures") do |file|
+      options.paths_file = file
+    end
 
     opts.on("-f", "--file [FILE]", "Nmap output in xml format") do |file|
       options.input_file = file
@@ -399,30 +389,42 @@ if __FILE__ == $0
     end
 
     opts.on("-v", "--version", "Get Version") do |ver|
-      puts "Yasuo #{Scan_and_parse::VERSION}"
+      puts "Yasuo #{VERSION}"
       exit
     end
-
-  end
-  opts.parse!(ARGV)
+  end.parse!(ARGV)
 
   unless options.input_file.length > 1 || options.ip_range.length > 1
-    puts "To perform the Nmap scan, use the option -r to provide the network range\n"
-    puts "Additionally, also provide the port number(s) or choose either option -pA to scan all ports or option -pD to scan top 1000 ports"
-    puts "If you already have an Nmap scan output file in XML format, use -f to provide the file path and name\n\n"
-    puts opts
+    puts "To perform the Nmap scan, use the option -r to provide the network range.\n"
+    puts "Additionally, also provide the port number(s) or choose either option -pA \n"
+    puts "to scan all ports or option -pD to scan top 1000 ports.\n\n"
+    puts "If you already have an Nmap scan output file in XML format, use -f\n"
+    puts "to provide the file path and name\n\n"
     exit
   end
 
-  # Passing the parsed options to the Scan and Parse class so that they can be used
-  letsgo = Scan_and_parse.new(options.input_file, options.ip_range, options.port_range, options.all_ports_all,options.brute)
-  # logic to determine if scan is performed
-  if options.input_file.length > 1
-    letsgo.lameparse
-  else
-    puts "Initiating port scan"
-    puts "----------------------\n"
-    letsgo.lamescan
-    letsgo.lameparse
+  if not File.exists?(options.paths_file)
+    puts "Yasou needs a CSV file of path signatures to function.".red
+    exit
   end
+
+  if not File.exists?(options.input_file)
+    puts "Nmap scan file not found.".red
+    exit
+  end
+
+  if not options.brute.empty? and (not File.exists?('users.txt') or not File.exists?('pass.txt') == false)
+    puts "If you want to do bruteforcing please ensure you have both files users.txt and pass.txt".red
+    exit
+  end
+
+  # Let's go!
+  Scanner.new(
+    options.paths,
+    options.input_file,
+    options.ip_range,
+    options.port_range,
+    options.all_ports_all,
+    options.brute
+  ).run()
 end

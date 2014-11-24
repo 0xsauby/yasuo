@@ -1,11 +1,9 @@
-#!/usr/bin/env ruby
-
+require "colorize"
+require "mechanize"
 require "net/http"
 require "net/https"
+require "nokogiri"
 require "uri"
-require 'nokogiri'
-require 'mechanize'
-require 'colorize'
 
 
 # A simple wrapper around Mechanize to help automate brute forcing a login
@@ -43,7 +41,7 @@ module LoginFormBruteForcer
     if loginform.nil?
 			puts "Login page not found. Looks like this instance maybe unauthenticated".green
 			user_found = ""
-			pass_found = ""	
+			pass_found = ""
 		else
 			username = loginform.field_with(name: /user|email|login|REGEMAIL|name/i)
 			password = loginform.field_with(name: /pass|pwd|REGCODE/i)
