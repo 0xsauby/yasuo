@@ -134,15 +134,15 @@ private
             $portst = "#{port.state}"
             $portserv = "#{port.service}"
             puts "Discovered open port: #{$thisip}:#{$portnum}"
-            #puts "--------------------------------------------"
+
             #Determine if the service is running SSL and begin to build appropriate URL
             if(("#{$portserv}".include?  "https") || ("#{$portserv}".include?  "ssl"))
               $ssl = true
               $targeturi = "https://#{$thisip}:#{$portnum}"
               $fakeuri = "https://#{$thisip}:#{$portnum}/#{fakepath}"
               $fakediruri = "https://#{$thisip}:#{$portnum}/#{fakedir}"
-              fakeuriresp = httpsGETRequest($fakeuri)
-              fakedirresp = httpsGETRequest($fakediruri)
+              fakeuriresp = httpGETRequest($fakeuri, :use_ssl => true)
+              fakedirresp = httpGETRequest($fakediruri, :use_ssl => true)
               #next
               if ((fakeuriresp != nil) and (fakeuriresp.code != '200') and (fakeuriresp.code != '401') and (fakedirresp != nil) and (fakedirresp.code != '200') and (fakedirresp.code != '401'))
                 finalurls << $targeturi
@@ -207,12 +207,12 @@ private
         attackurl = url + defpath
         puts "Testing ----> ".red + "#{attackurl}"  #saurabh: comment this for less verbose output
         if("#{attackurl}".include?  "https")
-          resp = httpsGETRequest(attackurl)
+          resp = httpGETRequest(attackurl, :use_ssl => true)
           if ((resp != nil) and (resp.code == "301"))
             if ("#{resp.header['location']}".include? "http")
-              resp = httpsGETRequest(resp.header['location'])
+              resp = httpGETRequest(resp.header['location'], :use_ssl => true)
             else
-              resp = httpsGETRequest("#{attackurl}" + resp.header['location'])
+              resp = httpGETRequest("#{attackurl}" + resp.header['location'], :use_ssl => true)
             end
           end
         else
@@ -228,7 +228,6 @@ private
         end
 
         if (resp != nil)
-          #puts "Testing ----> ".red + "#{attackurl}"
           case resp.code
           when "200"
             thefinalurls.delete_at(myindex)
@@ -261,7 +260,6 @@ private
             @info.push([attackurl, script, creds[0], creds[1]])
             break
           when "404"
-            #puts "Not found"
             next
           end
         end
@@ -269,34 +267,32 @@ private
     end
   end
 
+  # TODO: this is very similar to brute_by_force in resp200.
   def lameauthbrute(url401)
     url = URI.parse(url401)
-    win = 0
-    user_found = "Not Found"
-    pass_found = "Not Found"
 
     LoginFormBruteForcer::usernames_and_passwords.each do |user, pass|
-      if (url.scheme == "https")
-        res = httpsGETRequest(url401, user.chomp, pass.chomp)
-        sleep 0.5
-      else
-        res = httpGETRequest(url401, user.chomp, pass.chomp)
-        sleep 0.5
-      end
-      if (res != nil) and (res.code == "200" or res.code == "301")
-        puts ("Yatta, found default login credentials - #{user.chomp} / #{pass.chomp}\n").green
-        win = 1
-        user_found = user.chomp
-        pass_found = pass.chomp
+      username, password = user.chomp, pass.chomp
+      use_ssl = url.scheme == "https"
+      response = httpGETRequest(url401, :username => username, :password => password, :use_ssl => use_ssl)
+
+      sleep 0.5  # RAM: why?
+
+      if response and (response.code == "200" or response.code == "301")
+        puts ("Yatta, found default login credentials - #{username} / #{password}\n").green
+        return username, password
       end
     end
-    if win == 0
-      puts "Could not find default credentials, sucks".red
-    end
-    return user_found, pass_found
+
+    puts "Could not find default credentials, sucks".red
+    return "Not Found", "Not Found"
   end
 
-  def httpGETRequest(url, username="", password="", use_ssl=false)
+  def httpGETRequest(url, opts={})
+    username = opts[:username] || ""
+    password = opts[:password] || ""
+    use_ssl  = opts[:use_ssl] || false
+
     uri = URI.parse(url)
     http = Net::HTTP.new(uri.host, uri.port)
     http.open_timeout = 5   #saurabh
@@ -324,10 +320,6 @@ private
     end
 
     return resp
-  end
-
-  def httpsGETRequest(url, username="", password="")
-    return httpGETRequest(url, username, password, true)
   end
 end
 
