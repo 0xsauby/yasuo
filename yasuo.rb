@@ -75,6 +75,7 @@ class Scanner
       nmap.xml = 'nmap_output_' + Time.now.gmtime.to_s.gsub(/\W/,'') + '.xml'
       nmap.os_fingerprint = false
       nmap.verbose = false
+      nmap.targets = @target_ips_range
 
       # Logic for determining which ports are to be scanned by the script
       if @scan_all_ports
@@ -83,12 +84,11 @@ class Scanner
         nmap.ports = @scan_port_range
       end
 
-      nmap.targets = @target_ips_range
-
       # Set the input filename so that when lameparse is called it will scan the
       # default scan output.
       @nmap_filename = "#{nmap.xml}"
     end
+  ensure
     $stdout.reopen(orig_std_out)
   end
 
