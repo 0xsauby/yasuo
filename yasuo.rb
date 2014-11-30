@@ -119,7 +119,7 @@ private
     fake_path = 'thisfilecanneverexistwtf.txt'
     fake_dir = 'thisfilecanneverexistwtf/'
 
-    final_urls = []
+    target_urls = []
 
     puts "Using nmap scan output file #{@nmap_filename}"
 
@@ -127,12 +127,12 @@ private
       xml.each_host do |host|
         puts "\n<<<Testing host - #{host.ip}>>>".red
 
-        openportcount = 0
+        open_ports = 0
         host.each_port do |port|
           open_port = "#{port.state}" == "open"
           web_service = "#{port.service}".include?("http") or port.service == "websm" or "#{port.service}".include?("ssl")
           if open_port and web_service
-            openportcount += 1
+            open_ports += 1
 
             port_number = "#{port.number}"
             port_service = "#{port.service}"
@@ -151,21 +151,21 @@ private
 
             if (fake_uri_resp and fake_uri_resp.code != '200' and fake_uri_resp.code != '401' and
                 fake_dir_resp and fake_dir_resp.code != '200' and fake_dir_resp.code != '401')
-              final_urls << target_uri
+              target_urls << target_uri
             else
               puts "#{target_uri} returns HTTP 200 or 401 for every requested resource. Ignoring it"
             end
           end
         end
 
-        if openportcount.zero?
+        if open_ports.zero?
           puts "Either all the ports were closed or Yasuo did not find any web-based services.\n".red
           puts "Check #{@nmap_filename} for scan output\n".red
         end
       end
     end
 
-    lamerequest(final_urls)
+    find_vulnerable_applications(target_urls)
 
     puts ""
     puts ""
@@ -175,75 +175,68 @@ private
     puts @info.to_table(:first_row_is_head => true)
   end
 
-  def lamerequest(thefinalurls)
-    puts "\n<<<Randomizing target urls to avoid detection>>>".red
-    thefinalurls = thefinalurls.shuffle   #Randomizing the array to distribute load. Go stealth or go home
+  def find_vulnerable_applications(target_urls)
+    #Randomizing the array to distribute load. Go stealth or go home.
+    target_urls = target_urls.shuffle
 
-    #Reading and processing the default path file
-    defpath = ""
-    resp = ""
-    pathfile = @paths_filename
-    creds = Array.new
+    # where we will store all the creds we find
+    creds = []
 
     puts "\n<<<Enumerating vulnerable applications>>>".red
     puts "-------------------------------------------\n"
 
-    CSV.foreach(pathfile) do |row|
-      defpath = "#{row[0].strip}"
+    CSV.foreach(@paths_filename) do |row|
+      default_path = row[0].strip
       script = row[1]
-      thefinalurls.each_with_index do |url, myindex|
-        attackurl = url + defpath
-        puts "Testing ----> ".red + "#{attackurl}"  #saurabh: comment this for less verbose output
-        if("#{attackurl}".include?  "https")
-          resp = httpGETRequest(attackurl, :use_ssl => true)
-          if ((resp != nil) and (resp.code == "301"))
-            if ("#{resp.header['location']}".include? "http")
-              resp = httpGETRequest(resp.header['location'], :use_ssl => true)
-            else
-              resp = httpGETRequest("#{attackurl}" + resp.header['location'], :use_ssl => true)
-            end
-          end
-        else
-          resp = httpGETRequest(attackurl)
-          if ((resp != nil) and (resp.code == "301"))
-            #location header may contain absolute or relative path; hence this check
-            if ("#{resp.header['location']}".include? "http")
-              resp = httpGETRequest(resp.header['location'])
-            else
-              resp = httpGETRequest("#{attackurl}" + resp.header['location'])
-            end
+
+      target_urls.each_with_index do |url, myindex|
+        attack_url = url + default_path
+
+        puts "Testing ----> #{attack_url}".red  #saurabh: comment this for less verbose output
+
+        use_ssl = attack_url.include?  "https"
+        resp = httpGETRequest(attack_url, :use_ssl => use_ssl)
+        if resp and resp.code == "301"
+          if resp.header['location'].include? "http"
+            resp = httpGETRequest(resp.header['location'], :use_ssl => use_ssl)
+          else
+            resp = httpGETRequest(attack_url + resp.header['location'], :use_ssl => use_ssl)
           end
         end
 
-        if (resp != nil)
+        if resp
           case resp.code
           when "200"
-            thefinalurls.delete_at(myindex)
-            if (((resp.body.scan(/<form/i)).size != 0) and ((resp.body.scan(/login/i)).size != 0))
-              puts "Yasuo found - #{attackurl}. May require form based auth".green
+            target_urls.delete_at(myindex)
+
+            if not resp.body.scan(/<form/i).zero? and not resp.body.scan(/login/i).zero?
+              puts "Yasuo found - #{attack_url}. May require form based auth".green
               if @brute_force_mode == 'form' or @brute_force_mode == 'all'
                 puts "Double-checking if the application implements a login page and initiating login bruteforce attack, hold on tight..."
-                creds = LoginFormBruteForcer::brute_by_force(attackurl)
+                creds = LoginFormBruteForcer::brute_by_force(attack_url)
               else
                 creds = ["N/A", "N/A"]
               end
             else
-              puts "Yasuo found - #{attackurl}. No authentication required".green
-              creds = ["None","None"]
+              puts "Yasuo found - #{attack_url}. No authentication required".green
+              creds = ["None", "None"]
             end
-            @info.push([attackurl, script, creds[0], creds[1]])
+            @info.push([attack_url, script, creds[0], creds[1]])
             break
+
           when "401"
-            thefinalurls.delete_at(myindex)
-            puts "Yasuo found - #{attackurl}. Requires HTTP basic auth".green
-            if ((@input_brute == 'basic') or (@input_brute == 'all'))
+            target_urls.delete_at(myindex)
+
+            puts "Yasuo found - #{attack_url}. Requires HTTP basic auth".green
+            if @input_brute == 'basic' or @input_brute == 'all'
               puts "Initiating login bruteforce attack, hold on tight..."
-              creds = lameauthbrute(attackurl)
+              creds = brute_force_basic_auth(attack_url)
             else
               creds = ["N/A", "N/A"]
             end
-            @info.push([attackurl, script, creds[0], creds[1]])
+            @info.push([attack_url, script, creds[0], creds[1]])
             break
+
           when "404"
             next
           end
@@ -253,7 +246,7 @@ private
   end
 
   # TODO: this is very similar to brute_by_force in resp200.
-  def lameauthbrute(url401)
+  def brute_force_basic_auth(url401)
     url = URI.parse(url401)
 
     LoginFormBruteForcer::usernames_and_passwords.each do |user, pass|
@@ -276,7 +269,7 @@ private
   def httpGETRequest(url, opts={})
     username = opts[:username] || ""
     password = opts[:password] || ""
-    use_ssl  = opts[:use_ssl] || false
+    use_ssl  = opts[:use_ssl]  || false
 
     uri = URI.parse(url)
     http = Net::HTTP.new(uri.host, uri.port)
@@ -288,8 +281,8 @@ private
     end
 
     request = Net::HTTP::Get.new(uri.request_uri)
-    if (username != "" and password != "")
-      request.basic_auth username, password
+    if not (username.empty? or password.empty?)
+      request.basic_auth(username, password)
     end
 
     begin
