@@ -73,7 +73,9 @@ class Scanner
       puts "----------------------\n"
       nmap_scan
     end
-    lameparse
+
+    # look through nmap scan output to find vulnerable applications
+    process_nmap_scan
   end
 
 private
@@ -104,17 +106,18 @@ private
         @scan_port_range
       end
 
-      # Set the input filename so that when lameparse is called it will scan the
+      # Set the input filename so that when process_nmap_scan is called it will scan the
       # default scan output.
+      # TODO: we don't clean up this file.
       @nmap_filename = "#{nmap.xml}"
     end
   ensure
     $stdout.reopen(orig_std_out)
   end
 
-  def lameparse
-    fakepath = 'thisfilecanneverexistwtf.txt'
-    fakedir = 'thisfilecanneverexistwtf/'
+  def process_nmap_scan
+    fake_path = 'thisfilecanneverexistwtf.txt'
+    fake_dir = 'thisfilecanneverexistwtf/'
 
     final_urls = []
 
@@ -139,18 +142,18 @@ private
             # Determine if the service is running SSL and begin to build appropriate URL
             use_ssl    = port_service.include?("https") or port_service.include?("ssl")
             prefix     = use_ssl ? "https" : "http"
-            targeturi  = "#{prefix}://#{host.ip}:#{port_number}"
-            fakeuri    = "#{targeturi}/#{fakepath}"
-            fakediruri = "#{targeturi}/#{fakedir}"
+            target_uri  = "#{prefix}://#{host.ip}:#{port_number}"
+            fake_uri    = "#{target_uri}/#{fake_path}"
+            fake_dir_uri = "#{target_uri}/#{fake_dir}"
 
-            fake_uri_resp = httpGETRequest(fakeuri, :use_ssl => true)
-            fake_dir_resp = httpGETRequest(fakediruri, :use_ssl => true)
+            fake_uri_resp = httpGETRequest(fake_uri, :use_ssl => use_ssl)
+            fake_dir_resp = httpGETRequest(fake_dir_uri, :use_ssl => use_ssl)
 
             if (fake_uri_resp and fake_uri_resp.code != '200' and fake_uri_resp.code != '401' and
                 fake_dir_resp and fake_dir_resp.code != '200' and fake_dir_resp.code != '401')
-              final_urls << targeturi
+              final_urls << target_uri
             else
-              puts "#{targeturi} returns HTTP 200 or 401 for every requested resource. Ignoring it"
+              puts "#{target_uri} returns HTTP 200 or 401 for every requested resource. Ignoring it"
             end
           end
         end
