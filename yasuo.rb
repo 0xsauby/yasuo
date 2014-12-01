@@ -52,7 +52,7 @@ class Scanner
     @scan_port_range = scan_port_range
 
     # scan all ports
-    @input_port_all = scan_all_ports
+    @scan_all_ports = scan_all_ports
 
     # how should the scanner brute force applications that are found:
     #  - form (attempt to login to login forms found on pages)
@@ -209,7 +209,7 @@ private
           when "200"
             target_urls.delete_at(myindex)
 
-            if not resp.body.scan(/<form/i).zero? and not resp.body.scan(/login/i).zero?
+            if not resp.body.scan(/<form/i).empty? and not resp.body.scan(/login/i).empty?
               puts "Yasuo found - #{attack_url}. May require form based auth".green
               if @brute_force_mode == 'form' or @brute_force_mode == 'all'
                 puts "Double-checking if the application implements a login page and initiating login bruteforce attack, hold on tight..."
@@ -228,7 +228,7 @@ private
             target_urls.delete_at(myindex)
 
             puts "Yasuo found - #{attack_url}. Requires HTTP basic auth".green
-            if @input_brute == 'basic' or @input_brute == 'all'
+            if @brute_force_mode == 'basic' or @brute_force_mode == 'all'
               puts "Initiating login bruteforce attack, hold on tight..."
               creds = brute_force_basic_auth(attack_url)
             else
