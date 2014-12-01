@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#
+
 ## == Author
 ## Author::  Saurabh Hariti [0xsauby]
 ## Copyright:: Copyright (c) 2014 Saurabh Harit
@@ -18,71 +18,76 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-require 'nmap/program'
-require 'nmap/xml'
+
+require "colorize"
+require "csv"
 require "net/http"
-require 'net/http/persistent' #install gem
+require "net/http/persistent"
 require "net/https"
+require "nmap/program"
+require "nmap/xml"
+require "optparse"
+require "ostruct"
+require "text-table"
 require "uri"
-require 'csv'
-require 'colorize'  #install gem
-require 'text-table'
+
 require File.dirname(File.realpath(__FILE__)) + '/resp200.rb'
 
-#puts("Usage: ruby testscan.rb IP_Address Port_Number\n
-#IP_Address could be a single IP, a range of IPs or CIDR notation
-#PORT_Number could be a single port, multiple comma separated ports, range of ports, all (for 1-65535 ports), leave blank to scan the top 1000 ports
-puts "#########################################################################################"
-puts "oooooo   oooo       .o.        .oooooo..o ooooo     ooo   .oooooo.
- `888.   .8'       .888.      d8P'    `Y8 `888'     `8'  d8P'  `Y8b
-  `888. .8'       .88888.     Y88bo.       888       8  888      888
-   `888.8'       .8' `888.     `ZY8888o.   888       8  888      888
-    `888'       .88ooo8888.        `0Y88b  888       8  888      888
-     888       .8'     `888.  oo     .d8P  `88.    .8'  `88b    d88'
-    o888o     o88o     o8888o 88888888P'     `YbodP'     `Y8bood8P'"
-puts "Welcome to Yasuo v0.1"
-puts "Author: Saurabh Harit (@0xsauby) | Contribution & Coolness: Stephen Hall (@_stephen_h)"
-puts "#########################################################################################\n\n"
 
-#$fileout = $stdout.clone
-#$stdout.reopen('yasuo_output.txt')
+VERSION = '0.1'
 
-class Scan_and_parse
 
-  VERSION = '0.1'
+class Scanner
+  def initialize(paths_filename, nmap_filename, target_ips_range, scan_port_range, scan_all_ports, brute_force_mode)
+    # vulnerable applications signatures
+    @paths_filename = paths_filename
 
-  def initialize(input_filename, input_iprange, input_portrange, input_portall, input_brute)
-    begin
-      require 'nmap/program'
-    rescue LoadError
-      puts 'could not load the ruby-nmap library'
-      puts 'Try gem install ruby-nmap'
-      exit
-    end
+    # nmap XML file
+    @nmap_filename = nmap_filename
 
-    if (File.exists?('default-path.csv') == false)
-      puts "Yasou needs the default-path.csv file to run".red
-      exit
-    end
-    if(input_brute != "")
-      if ((File.exists?('users.txt') == false) or (File.exists?('pass.txt') == false))
-        puts "If you want to do bruteforcing please ensure you have both files users.txt and pass.txt".red
-        exit
-      end
-    end
+    # the range of IPs to scan
+    @target_ips_range = target_ips_range
 
-    @input_filename = input_filename
-    @input_iprange = input_iprange
-    @input_portrange = input_portrange
-    @input_portall = input_portall
-    @input_brute = input_brute.downcase
-    @info = Array.new([["URL to Application", "Potential Exploit", "Username", "Password"]])
+    # scan the given range of ports
+    @scan_port_range = scan_port_range
 
+    # scan all ports
+    @scan_all_ports = scan_all_ports
+
+    # how should the scanner brute force applications that are found:
+    #  - form (attempt to login to login forms found on pages)
+    #  - basic (just use HTTP basic auth)
+    #  - both
+    @brute_force_mode = brute_force_mode.downcase
+
+    # stores vulnerable applications that were found
+    @info = [
+      ["URL to Application", "Potential Exploit", "Username", "Password"]
+    ]
   end
 
-  def lamescan
+  def run
+    # logic to determine if scan is performed
+    if @nmap_filename.empty?
+      puts "Initiating port scan"
+      puts "----------------------\n"
+      nmap_scan
+    end
+
+    # look through nmap scan output to find vulnerable applications
+    process_nmap_scan
+  end
+
+private
+
+  # Runs an nmap scan, storing the result of the scan to the file system.
+  # We currently do not clean up these files after our program has finished
+  # running.
+  def nmap_scan
+    # silence sdtout for the duration of this method
     orig_std_out = $stdout.clone
     $stdout.reopen("/dev/null", "w")
+
     Nmap::Program.scan do |nmap|
       nmap.syn_scan = true
       nmap.service_scan = true
@@ -90,84 +95,77 @@ class Scan_and_parse
       nmap.os_fingerprint = false
       nmap.verbose = false
 
-      #Logic for determining which ports are to be scanned by the script
-      if @input_portall == true
-        nmap.ports = "1-65535"
-      elsif @input_portrange != ''
-        nmap.ports = @input_portrange
+      nmap.targets = @target_ips_range
+
+      # Logic for determining which ports are to be scanned by the script.
+      # TODO: what happens if neither flag is provided? Should we default to
+      #       all? (drop that flag.)
+      nmap.ports = if @scan_all_ports
+        "1-65535"
+      elsif not @scan_port_range.empty?
+        @scan_port_range
       end
 
-      nmap.targets = @input_iprange
-      #Set the input filename so that when lameparse is called it will scan the default scan output.
-      @input_filename = "#{nmap.xml}"
+      # Set the input filename so that when process_nmap_scan is called it will scan the
+      # default scan output.
+      # TODO: we don't clean up this file.
+      @nmap_filename = "#{nmap.xml}"
     end
+  ensure
     $stdout.reopen(orig_std_out)
   end
 
-  def lameparse
-    fakepath = 'thisfilecanneverexistwtf.txt'
-    fakedir = 'thisfilecanneverexistwtf/'
-    finalurls = Array.new
-    if (File.exists?(@input_filename))
-      puts "Using nmap scan output file #{@input_filename}"
-      Nmap::XML.new(@input_filename) do |xml|
-        xml.each_host do |host|
-          openportcount = 0
-          $vulnappfound = 0
-          puts "\n<<<Testing host - #{host.ip}>>>".red
-          $thisip = "#{host.ip}"
-          host.each_port do |port|
-            if((("#{port.service}".include? "http") || ("#{port.service}" == "websm") || ("#{port.service}".include? "ssl")) && ("#{port.state}" == "open"))
-              openportcount += 1
-              $portnum = "#{port.number}"
-              $portproto = "#{port.protocol}"
-              $portst = "#{port.state}"
-              $portserv = "#{port.service}"
-              puts "Discovered open port: #{$thisip}:#{$portnum}"
-              #puts "--------------------------------------------"
-              #Determine if the service is running SSL and begin to build appropriate URL
-              if(("#{$portserv}".include?  "https") || ("#{$portserv}".include?  "ssl"))
-                $ssl = true
-                $targeturi = "https://#{$thisip}:#{$portnum}"
-                $fakeuri = "https://#{$thisip}:#{$portnum}/#{fakepath}"
-                $fakediruri = "https://#{$thisip}:#{$portnum}/#{fakedir}"
-                fakeuriresp = httpsGETRequest($fakeuri)
-                fakedirresp = httpsGETRequest($fakediruri)
-                #next
-                if ((fakeuriresp != nil) and (fakeuriresp.code != '200') and (fakeuriresp.code != '401') and (fakedirresp != nil) and (fakedirresp.code != '200') and (fakedirresp.code != '401'))
-                  finalurls << $targeturi
-                else
-                  puts "#{$targeturi} returns HTTP 200 or 401 for every requested resource. Ignoring it"
-                end
-              else
-                $ssl = false
-                $targeturi = "http://#{$thisip}:#{$portnum}"
-                $fakeuri = "http://#{$thisip}:#{$portnum}/#{fakepath}"
-                $fakediruri = "http://#{$thisip}:#{$portnum}/#{fakedir}"
-                fakeuriresp = httpGETRequest($fakeuri)
-                fakedirresp = httpGETRequest($fakediruri)
-                #fakeresp will be null in case of an exception
-                if ((fakeuriresp != nil) and (fakeuriresp.code != '200') and (fakeuriresp.code != '401') and (fakedirresp != nil) and (fakedirresp.code != '200') and (fakedirresp.code != '401'))
-                  finalurls << $targeturi
-                  if ($vulnappfound == false)
-                    puts "Yasuo did not find any vulnerable application on #{$thisip}:#{$portnum}\n\n"
-                  end
-                else
-                  puts "#{$targeturi} returns HTTP 200 or 401 for every requested resource. Ignoring it"
-                end
-              end
+  def process_nmap_scan
+    fake_path = 'thisfilecanneverexistwtf.txt'
+    fake_dir = 'thisfilecanneverexistwtf/'
+
+    target_urls = []
+
+    puts "Using nmap scan output file #{@nmap_filename}"
+
+    Nmap::XML.new(@nmap_filename) do |xml|
+      xml.each_host do |host|
+        puts "\n<<<Testing host - #{host.ip}>>>".red
+
+        open_ports = 0
+        host.each_port do |port|
+          open_port = "#{port.state}" == "open"
+          web_service = "#{port.service}".include?("http") or port.service == "websm" or "#{port.service}".include?("ssl")
+          if open_port and web_service
+            open_ports += 1
+
+            port_number = "#{port.number}"
+            port_service = "#{port.service}"
+
+            puts "Discovered open port: #{host.ip}:#{port_number}"
+
+            # Determine if the service is running SSL and begin to build appropriate URL
+            use_ssl    = port_service.include?("https") or port_service.include?("ssl")
+            prefix     = use_ssl ? "https" : "http"
+            target_uri  = "#{prefix}://#{host.ip}:#{port_number}"
+            fake_uri    = "#{target_uri}/#{fake_path}"
+            fake_dir_uri = "#{target_uri}/#{fake_dir}"
+
+            fake_uri_resp = httpGETRequest(fake_uri, :use_ssl => use_ssl)
+            fake_dir_resp = httpGETRequest(fake_dir_uri, :use_ssl => use_ssl)
+
+            if (fake_uri_resp and fake_uri_resp.code != '200' and fake_uri_resp.code != '401' and
+                fake_dir_resp and fake_dir_resp.code != '200' and fake_dir_resp.code != '401')
+              target_urls << target_uri
+            else
+              puts "#{target_uri} returns HTTP 200 or 401 for every requested resource. Ignoring it"
             end
           end
-          if openportcount == 0
-            puts "Either all the ports were closed or Yasuo did not find any web-based services. Check #{@input_filename} for scan output\n".red
-          end
+        end
+
+        if open_ports.zero?
+          puts "Either all the ports were closed or Yasuo did not find any web-based services.\n".red
+          puts "Check #{@nmap_filename} for scan output\n".red
         end
       end
-    else
-      puts "Please specify the correct filename and path\n\n"
     end
 
-    lamerequest(finalurls)
+    find_vulnerable_applications(target_urls)
 
     puts ""
     puts ""
@@ -177,84 +175,69 @@ class Scan_and_parse
     puts @info.to_table(:first_row_is_head => true)
   end
 
-  def lamerequest(thefinalurls)
-    puts "\n<<<Randomizing target urls to avoid detection>>>".red
-    thefinalurls = thefinalurls.shuffle   #Randomizing the array to distribute load. Go stealth or go home
-    #puts "#{thefinalurls}"
+  def find_vulnerable_applications(target_urls)
+    #Randomizing the array to distribute load. Go stealth or go home.
+    target_urls = target_urls.shuffle
 
-    #Reading and processing the default path file
-    defpath = ""
-    resp = ""
-    pathfile = 'default-path.csv'
-    creds = Array.new
-    $vulnappfound = false
-
+    # where we will store all the creds we find
+    creds = []
 
     puts "\n<<<Enumerating vulnerable applications>>>".red
     puts "-------------------------------------------\n"
 
-    CSV.foreach(pathfile) do |row|
-      defpath = "#{row[0].strip}"
+    CSV.foreach(@paths_filename) do |row|
+      default_path = row[0].strip
       script = row[1]
-      thefinalurls.each_with_index do |url, myindex|
-        attackurl = url + defpath
-        puts "Testing ----> ".red + "#{attackurl}"  #saurabh: comment this for less verbose output
-        if("#{attackurl}".include?  "https")
-          resp = httpsGETRequest(attackurl)
-          if ((resp != nil) and (resp.code == "301"))
-            if ("#{resp.header['location']}".include? "http")
-              resp = httpsGETRequest(resp.header['location'])
-            else
-              resp = httpsGETRequest("#{attackurl}" + resp.header['location'])
-            end
-          end
-        else
-          resp = httpGETRequest(attackurl)
-          if ((resp != nil) and (resp.code == "301"))
-            #location header may contain absolute or relative path; hence this check
-            if ("#{resp.header['location']}".include? "http")
-              resp = httpGETRequest(resp.header['location'])
-            else
-              resp = httpGETRequest("#{attackurl}" + resp.header['location'])
-            end
+
+      target_urls.each_with_index do |url, myindex|
+        attack_url = url + default_path
+
+        puts "Testing ----> #{attack_url}".red  #saurabh: comment this for less verbose output
+
+        use_ssl = attack_url.include?  "https"
+        resp = httpGETRequest(attack_url, :use_ssl => use_ssl)
+        if resp and resp.code == "301"
+          if resp.header['location'].include? "http"
+            resp = httpGETRequest(resp.header['location'], :use_ssl => use_ssl)
+          else
+            resp = httpGETRequest(attack_url + resp.header['location'], :use_ssl => use_ssl)
           end
         end
 
-        if (resp != nil)
-          #puts "Testing ----> ".red + "#{attackurl}"
+        if resp
           case resp.code
           when "200"
-            thefinalurls.delete_at(myindex)
-            if (((resp.body.scan(/<form/i)).size != 0) and ((resp.body.scan(/login/i)).size != 0))
-              puts "Yasuo found - #{attackurl}. May require form based auth".green
-              if ((@input_brute == 'form') or (@input_brute == 'all'))
+            target_urls.delete_at(myindex)
+
+            if not resp.body.scan(/<form/i).empty? and not resp.body.scan(/login/i).empty?
+              puts "Yasuo found - #{attack_url}. May require form based auth".green
+              if @brute_force_mode == 'form' or @brute_force_mode == 'all'
                 puts "Double-checking if the application implements a login page and initiating login bruteforce attack, hold on tight..."
-                creds = LoginFormBruteForcer::brutebyforce(attackurl)
+                creds = LoginFormBruteForcer::brute_by_force(attack_url)
               else
                 creds = ["N/A", "N/A"]
               end
             else
-              puts "Yasuo found - #{attackurl}. No authentication required".green
-              creds = ["None","None"]
+              puts "Yasuo found - #{attack_url}. No authentication required".green
+              creds = ["None", "None"]
             end
-            $vulnappfound = true
-            @info.push([attackurl, script, creds[0], creds[1]])
+            @info.push([attack_url, script, creds[0], creds[1]])
             break
+
           when "401"
-            thefinalurls.delete_at(myindex)
-            puts "Yasuo found - #{attackurl}. Requires HTTP basic auth".green
-            if ((@input_brute == 'basic') or (@input_brute == 'all'))
+            target_urls.delete_at(myindex)
+
+            puts "Yasuo found - #{attack_url}. Requires HTTP basic auth".green
+            if @brute_force_mode == 'basic' or @brute_force_mode == 'all'
               puts "Initiating login bruteforce attack, hold on tight..."
-              creds = lameauthbrute(attackurl)
+              creds = brute_force_basic_auth(attack_url)
             else
               creds = ["N/A", "N/A"]
             end
-            #puts creds
-            $vulnappfound = true
-            @info.push([attackurl, script, creds[0], creds[1]])
+            @info.push([attack_url, script, creds[0], creds[1]])
             break
+
           when "404"
-            #puts "Not found"
             next
           end
         end
@@ -262,44 +245,46 @@ class Scan_and_parse
     end
   end
 
-  def lameauthbrute(url401)
+  # TODO: this is very similar to brute_by_force in resp200.
+  def brute_force_basic_auth(url401)
     url = URI.parse(url401)
-    win = 0
-    user_found = "Not Found"
-    pass_found = "Not Found"
 
     LoginFormBruteForcer::usernames_and_passwords.each do |user, pass|
-      if (url.scheme == "https")
-        res = httpsGETRequest(url401, user.chomp, pass.chomp)
-        sleep 0.5
-      else
-        res = httpGETRequest(url401, user.chomp, pass.chomp)
-        sleep 0.5
-      end
-      if ((res != nil) and (res.code == "200" or res.code == "301"))
-        puts ("Yatta, found default login credentials - #{user.chomp} / #{pass.chomp}\n").green
-        win = 1
-        user_found = user.chomp
-        pass_found = pass.chomp
+      username, password = user.chomp, pass.chomp
+      use_ssl = url.scheme == "https"
+      response = httpGETRequest(url401, :username => username, :password => password, :use_ssl => use_ssl)
+
+      sleep 0.5  # RAM: why?
+
+      if response and (response.code == "200" or response.code == "301")
+        puts ("Yatta, found default login credentials - #{username} / #{password}\n").green
+        return username, password
       end
     end
-    if win == 0
-      puts("Could not find default credentials, sucks".red)
-    end
-    return user_found,pass_found
+
+    puts "Could not find default credentials, sucks".red
+    return "Not Found", "Not Found"
   end
 
-  def httpsGETRequest(url, username="", password="")
+  def httpGETRequest(url, opts={})
+    username = opts[:username] || ""
+    password = opts[:password] || ""
+    use_ssl  = opts[:use_ssl]  || false
+
     uri = URI.parse(url)
     http = Net::HTTP.new(uri.host, uri.port)
     http.open_timeout = 5   #saurabh
     http.read_timeout = 5   #saurabh
-    http.use_ssl = true
-    http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-    request = Net::HTTP::Get.new(uri.request_uri)
-    if (username != "" and password != "")
-      request.basic_auth username, password
+    if use_ssl
+      http.use_ssl = true
+      http.verify_mode = OpenSSL::SSL::VERIFY_NONE
     end
+
+    request = Net::HTTP::Get.new(uri.request_uri)
+    if not (username.empty? or password.empty?)
+      request.basic_auth(username, password)
+    end
+
     begin
       resp = http.request(request)
     rescue IOError, Errno::EINVAL, EOFError, Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, Net::ProtocolError, Net::HTTP::Persistent::Error
@@ -314,50 +299,40 @@ class Scan_and_parse
 
     return resp
   end
-
-  def httpGETRequest(url, username="", password="")
-    uri = URI.parse(url)
-    http = Net::HTTP.new(uri.host, uri.port)
-    http.open_timeout = 5   #saurabh
-    http.read_timeout = 5   #saurabh
-    request = Net::HTTP::Get.new(uri.request_uri)
-    if (username != "" and password != "")
-      request.basic_auth username, password
-    end
-    begin
-      resp = http.request(request)
-    rescue IOError, Errno::EINVAL, EOFError, Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, Net::ProtocolError, Net::HTTP::Persistent::Error
-      #exit
-    rescue OpenSSL::SSL::SSLError
-      puts "#{$url}: SSL Error, site might not use SSL"
-      #exit
-    rescue Timeout::Error, Errno::ECONNREFUSED, Errno::ECONNRESET, SocketError
-      puts "#{$url}: Connection timed out or reset."
-      #exit
-    end
-
-    return resp
-  end
 end
 
+
 if __FILE__ == $0
-  require 'optparse'
-  require 'ostruct'
+  puts "#########################################################################################"
+  puts "oooooo   oooo       .o.        .oooooo..o ooooo     ooo   .oooooo.
+   `888.   .8'       .888.      d8P'    `Y8 `888'     `8'  d8P'  `Y8b
+    `888. .8'       .88888.     Y88bo.       888       8  888      888
+     `888.8'       .8' `888.     `ZY8888o.   888       8  888      888
+      `888'       .88ooo8888.        `0Y88b  888       8  888      888
+       888       .8'     `888.  oo     .d8P  `88.    .8'  `88b    d88'
+      o888o     o88o     o8888o 88888888P'     `YbodP'     `Y8bood8P'"
+  puts "Welcome to Yasuo v#{VERSION}"
+  puts "Author: Saurabh Harit (@0xsauby) | Contribution & Coolness: Stephen Hall (@_stephen_h)"
+  puts "#########################################################################################\n\n"
 
   options = OpenStruct.new
-  options.input_file = ''
+  options.nmap_file = ''
   options.ip_range = ''
   options.port_range = ''
   options.no_ping = false
-  options.all_ports_all = false
+  options.all_ports = false
   options.brute = ''
+  options.paths_file = 'default-path.csv'  # TODO: add option to set this value
 
+  OptionParser.new do |opts|
+    opts.banner = "Yasuo #{VERSION}"
 
-  opts = OptionParser.new do |opts|
-    opts.banner = "Yasuo #{Scan_and_parse::VERSION}"
+    opts.on("-s", "--path-signatures", "CSV file of vulnerable app signatures") do |file|
+      options.paths_file = file
+    end
 
     opts.on("-f", "--file [FILE]", "Nmap output in xml format") do |file|
-      options.input_file = file
+      options.nmap_file = file
     end
 
     opts.on("-r", "--range [RANGE]", "IP Range to Scan") do |iprange|
@@ -386,7 +361,7 @@ if __FILE__ == $0
     end
 
     opts.on("-A", "--all_ports", "Scan on all 65535 ports") do |all_ports|
-      options.all_ports_all = true
+      options.all_ports = true
     end
 
     opts.on("-b", "--brute [all/form/basic]", "Bruteforce") do |brute|
@@ -399,30 +374,38 @@ if __FILE__ == $0
     end
 
     opts.on("-v", "--version", "Get Version") do |ver|
-      puts "Yasuo #{Scan_and_parse::VERSION}"
+      puts "Yasuo #{VERSION}"
       exit
     end
+  end.parse!(ARGV)
 
-  end
-  opts.parse!(ARGV)
-
-  unless options.input_file.length > 1 || options.ip_range.length > 1
-    puts "To perform the Nmap scan, use the option -r to provide the network range\n"
-    puts "Additionally, also provide the port number(s) or choose either option -pA to scan all ports or option -pD to scan top 1000 ports"
-    puts "If you already have an Nmap scan output file in XML format, use -f to provide the file path and name\n\n"
-    puts opts
+  unless options.nmap_file.length > 1 || options.ip_range.length > 1
+    puts "To perform the Nmap scan, use the option -r to provide the network range.\n"
+    puts "Additionally, also provide the port number(s) or choose either option -pA \n"
+    puts "to scan all ports or option -pD to scan top 1000 ports.\n\n"
+    puts "If you already have an Nmap scan output file in XML format, use -f\n"
+    puts "to provide the file path and name\n\n"
     exit
   end
 
-  # Passing the parsed options to the Scan and Parse class so that they can be used
-  letsgo = Scan_and_parse.new(options.input_file, options.ip_range, options.port_range, options.all_ports_all,options.brute)
-  # logic to determine if scan is performed
-  if options.input_file.length > 1
-    letsgo.lameparse
-  else
-    puts "Initiating port scan"
-    puts "----------------------\n"
-    letsgo.lamescan
-    letsgo.lameparse
+  if not File.exists?(options.paths_file)
+    puts "Yasou needs a CSV file of path signatures to function.".red
+    exit
   end
+
+
+  if not options.brute.empty? and (not File.exists?('users.txt') or not File.exists?('pass.txt'))
+    puts "If you want to do bruteforcing please ensure you have both files users.txt and pass.txt".red
+    exit
+  end
+
+  # Let's go!
+  Scanner.new(
+    options.paths_file,
+    options.nmap_file,
+    options.ip_range,
+    options.port_range,
+    options.all_ports,
+    options.brute
+  ).run()
 end
