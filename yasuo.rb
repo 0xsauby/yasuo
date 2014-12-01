@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 ## == Author
-## Author::  Saurabh Hariti [0xsauby]
+## Author::  Saurabh Harit [0xsauby]
 ## Copyright:: Copyright (c) 2014 Saurabh Harit
 ## License:: GPLv3
 ##
@@ -34,7 +34,7 @@ require "uri"
 require File.dirname(File.realpath(__FILE__)) + '/resp200.rb'
 
 
-VERSION = '0.1'
+VERSION = '0.9'
 
 
 class Scanner
@@ -254,7 +254,7 @@ private
       use_ssl = url.scheme == "https"
       response = httpGETRequest(url401, :username => username, :password => password, :use_ssl => use_ssl)
 
-      sleep 0.5  # RAM: why?
+      sleep 0.5
 
       if response and (response.code == "200" or response.code == "301")
         puts ("Yatta, found default login credentials - #{username} / #{password}\n").green
