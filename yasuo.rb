@@ -30,6 +30,7 @@ require "optparse"
 require "ostruct"
 require "text-table"
 require "uri"
+require "thread"
 
 require File.dirname(File.realpath(__FILE__)) + '/resp200.rb'
 
@@ -38,7 +39,7 @@ VERSION = '0.9'
 
 
 class Scanner
-  def initialize(paths_filename, nmap_filename, target_ips_range, scan_port_range, scan_all_ports, brute_force_mode)
+  def initialize(paths_filename, nmap_filename, target_ips_range, scan_port_range, scan_all_ports, brute_force_mode, number_of_threads)
     # vulnerable applications signatures
     @paths_filename = paths_filename
 
@@ -59,6 +60,9 @@ class Scanner
     #  - basic (just use HTTP basic auth)
     #  - both
     @brute_force_mode = brute_force_mode.downcase
+
+    # Number of threads to use with the scanner.
+    @thread_count = number_of_threads
 
     # stores vulnerable applications that were found
     @info = [
@@ -165,7 +169,21 @@ private
       end
     end
 
-    find_vulnerable_applications(target_urls)
+   slice_size = (target_urls.size/Float(@thread_count)).ceil
+   thread_list = target_urls.each_slice(slice_size).to_a
+
+   threads = []
+   @thread_count.times do |i|
+      if thread_list[i] != nil
+        threads << Thread.new do
+          find_vulnerable_applications(thread_list[i])
+        end
+      end
+    end
+
+    threads.each do |scan_thread| 
+      scan_thread.join
+    end
 
     puts ""
     puts ""
@@ -176,6 +194,7 @@ private
   end
 
   def find_vulnerable_applications(target_urls)
+    puts target_urls.size
     #Randomizing the array to distribute load. Go stealth or go home.
     target_urls = target_urls.shuffle
 
@@ -192,7 +211,7 @@ private
       target_urls.each_with_index do |url, myindex|
         attack_url = url + default_path
 
-        puts "Testing ----> #{attack_url}".red  #saurabh: comment this for less verbose output
+        #puts "Testing ----> #{attack_url}".red  #saurabh: comment this for less verbose output
 
         use_ssl = attack_url.include?  "https"
         resp = httpGETRequest(attack_url, :use_ssl => use_ssl)
@@ -292,7 +311,7 @@ private
     rescue OpenSSL::SSL::SSLError
       puts "#{$url}: SSL Error, site might not use SSL"
       #exit #Saurabh - This exit breaks execution of the script. Remaining port and hosts will not be tested. All other exit statements should be commented as well.
-    rescue Timeout::Error, Errno::ECONNREFUSED, Errno::ECONNRESET, SocketError
+    rescue Timeout::Error, Errno::ECONNREFUSED, Errno::ECONNRESET, SocketError, Errno::EHOSTUNREACH
       puts "#{$url}: Connection timed out or reset."
       #exit
     end
@@ -300,7 +319,6 @@ private
     return resp
   end
 end
-
 
 if __FILE__ == $0
   puts "#########################################################################################"
@@ -322,6 +340,7 @@ if __FILE__ == $0
   options.no_ping = false
   options.all_ports = false
   options.brute = ''
+  options.thread_count = 3
   options.paths_file = 'default-path.csv'  # TODO: add option to set this value
 
   OptionParser.new do |opts|
@@ -368,6 +387,15 @@ if __FILE__ == $0
       options.brute = brute
     end
 
+    opts.on("-t", "--threads [Max Thread Count]", "Max number of threads to be used") do |thread_count|
+      if thread_count.to_i > 0
+        options.thread_count = thread_count.to_i
+      else
+        puts "Please enter a positive value for the number of threads"
+        exit
+      end
+    end
+
     opts.on("-h", "--help", "-?", "--?", "Get Help") do |help|
       puts opts
       exit
@@ -406,6 +434,7 @@ if __FILE__ == $0
     options.ip_range,
     options.port_range,
     options.all_ports,
-    options.brute
+    options.brute,
+    options.thread_count
   ).run()
 end
