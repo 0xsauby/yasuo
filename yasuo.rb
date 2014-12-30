@@ -312,7 +312,7 @@ if __FILE__ == $0
        888       .8'     `888.  oo     .d8P  `88.    .8'  `88b    d88'
       o888o     o88o     o8888o 88888888P'     `YbodP'     `Y8bood8P'"
   puts "Welcome to Yasuo v#{VERSION}"
-  puts "Author: Saurabh Harit (@0xsauby) | Contribution & Coolness: Stephen Hall (@_stephen_h)"
+  puts "Author: Saurabh Harit (@0xsauby) | Contribution & Coolness: Stephen Hall (@logicalsec)"
   puts "#########################################################################################\n\n"
 
   options = OpenStruct.new
