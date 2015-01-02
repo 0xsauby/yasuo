@@ -27,7 +27,7 @@
 /qdPM/,./exploits/multi/http/qdpm_upload_exec.rb
 /www/,./exploits/multi/http/webpagetest_upload_exec.rb
 /gestioip/,./exploits/multi/http/gestioip_exec.rb
-/polarbearcms,,./exploits/multi/http/polarcms_upload_exec.rb
+/polarbearcms,./exploits/multi/http/polarcms_upload_exec.rb
 /SiteScope/,./exploits/multi/http/hp_sitescope_uploadfileshandler.rb
 /invoker/JMXInvokerServlet,./exploits/multi/http/jboss_invoke_deploy.rb
 /blank-struts2/login.action,./exploits/multi/http/struts_code_exec_parameters.rb
