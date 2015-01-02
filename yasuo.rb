@@ -35,7 +35,7 @@ require "thread"
 require File.dirname(File.realpath(__FILE__)) + '/resp200.rb'
 
 
-VERSION = '0.9'
+VERSION = '1.0'
 
 
 class Scanner
@@ -246,7 +246,7 @@ private
       target_urls.each_with_index do |url, myindex|
         attack_url = url + default_path
 
-        #puts "Testing ----> #{attack_url}".red  #saurabh: comment this for less verbose output
+        puts "Testing ----> #{attack_url}".red  #saurabh: comment this for less verbose output
 
         use_ssl = attack_url.include?  "https"
         resp = httpGETRequest(attack_url, :use_ssl => use_ssl)
