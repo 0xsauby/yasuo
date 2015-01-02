@@ -211,6 +211,10 @@ private
    @thread_count.times do |i|
       if thread_list[i] != nil
         threads << Thread.new do
+          if i == 0
+            puts "\n<<<Enumerating vulnerable applications>>>".red
+            puts "-------------------------------------------\n"
+          end
           find_vulnerable_applications(thread_list[i])
         end
       end
@@ -234,9 +238,6 @@ private
 
     # where we will store all the creds we find
     creds = []
-
-    puts "\n<<<Enumerating vulnerable applications>>>".red
-    puts "-------------------------------------------\n"
 
     CSV.foreach(@paths_filename) do |row|
       default_path = row[0].strip
@@ -310,7 +311,7 @@ private
       sleep 0.5
 
       if response and (response.code == "200" or response.code == "301")
-        puts ("Yatta, found default login credentials - #{username} / #{password}\n").green
+        puts ("Yatta, found default login credentials for #{url401} - #{username} / #{password}\n").green
         return username, password
       end
     end
@@ -374,7 +375,7 @@ if __FILE__ == $0
   options.no_ping = false
   options.all_ports = false
   options.brute = ''
-  options.thread_count = 3
+  options.thread_count = 1
   options.paths_file = 'default-path.csv'  # TODO: add option to set this value
 
   OptionParser.new do |opts|
