@@ -30,6 +30,7 @@ require "optparse"
 require "ostruct"
 require "text-table"
 require "uri"
+require "thread"
 
 require File.dirname(File.realpath(__FILE__)) + '/resp200.rb'
 
@@ -38,7 +39,7 @@ VERSION = '0.9'
 
 
 class Scanner
-  def initialize(paths_filename, nmap_filename, target_ips_range, scan_port_range, scan_all_ports, brute_force_mode)
+  def initialize(paths_filename, nmap_filename, target_ips_range, scan_port_range, scan_all_ports, brute_force_mode, number_of_threads)
     # vulnerable applications signatures
     @paths_filename = paths_filename
 
@@ -59,6 +60,9 @@ class Scanner
     #  - basic (just use HTTP basic auth)
     #  - both
     @brute_force_mode = brute_force_mode.downcase
+
+    # Number of threads to use with the scanner.
+    @thread_count = number_of_threads
 
     # stores vulnerable applications that were found
     @info = [
@@ -131,6 +135,7 @@ private
         host.each_port do |port|
           open_port = "#{port.state}" == "open"
           web_service = "#{port.service}".include?("http") or port.service == "websm" or "#{port.service}".include?("ssl")
+          wrapped_service = "#{port.service}".include?("tcpwrapped")
           if open_port and web_service
             open_ports += 1
 
@@ -155,6 +160,40 @@ private
             else
               puts "#{target_uri} returns HTTP 200 or 401 for every requested resource. Ignoring it"
             end
+          elsif open_port and wrapped_service
+            open_ports += 1
+
+            port_number = "#{port.number}"
+            port_service = "#{port.service}"
+
+            puts "Discovered tcpwrapped port: #{host.ip}:#{port_number}"
+
+            # Determine if the service is running SSL and begin to build appropriate URL
+            prefix     = "https" 
+            target_uri  = "#{prefix}://#{host.ip}:#{port_number}"
+            fake_uri    = "#{target_uri}/#{fake_path}"
+            fake_dir_uri = "#{target_uri}/#{fake_dir}"
+
+            fake_uri_resp = httpGETRequest(fake_uri, :use_ssl => true)
+            fake_dir_resp = httpGETRequest(fake_dir_uri, :use_ssl => true)
+
+            if (fake_uri_resp and fake_uri_resp.code != '200' and fake_uri_resp.code != '401' and fake_dir_resp and fake_dir_resp.code != '200' and fake_dir_resp.code != '401')
+              target_urls << target_uri
+            elsif (fake_uri_resp and fake_uri_resp.code == nil and fake_dir_resp.code == nil)
+              prefix     = "http" 
+              target_uri  = "#{prefix}://#{host.ip}:#{port_number}"
+              fake_uri    = "#{target_uri}/#{fake_path}"
+              fake_dir_uri = "#{target_uri}/#{fake_dir}"
+
+              fake_uri_resp = httpGETRequest(fake_uri)
+              fake_dir_resp = httpGETRequest(fake_dir_uri)
+
+              if (fake_uri_resp and fake_uri_resp.code != '200' and fake_uri_resp.code != '401' and fake_dir_resp and fake_dir_resp.code != '200' and fake_dir_resp.code != '401')
+                target_urls << target_uri
+              else
+                puts "#{target_uri} returns HTTP 200 or 401 for every requested resource. Ignoring it"
+              end
+            end
           end
         end
 
@@ -165,7 +204,25 @@ private
       end
     end
 
-    find_vulnerable_applications(target_urls)
+   slice_size = (target_urls.size/Float(@thread_count)).ceil
+   thread_list = target_urls.each_slice(slice_size).to_a
+
+   threads = []
+   @thread_count.times do |i|
+      if thread_list[i] != nil
+        threads << Thread.new do
+          if i == 0
+            puts "\n<<<Enumerating vulnerable applications>>>".red
+            puts "-------------------------------------------\n"
+          end
+          find_vulnerable_applications(thread_list[i])
+        end
+      end
+    end
+
+    threads.each do |scan_thread| 
+      scan_thread.join
+    end
 
     puts ""
     puts ""
@@ -182,9 +239,6 @@ private
     # where we will store all the creds we find
     creds = []
 
-    puts "\n<<<Enumerating vulnerable applications>>>".red
-    puts "-------------------------------------------\n"
-
     CSV.foreach(@paths_filename) do |row|
       default_path = row[0].strip
       script = row[1]
@@ -192,7 +246,7 @@ private
       target_urls.each_with_index do |url, myindex|
         attack_url = url + default_path
 
-        puts "Testing ----> #{attack_url}".red  #saurabh: comment this for less verbose output
+        #puts "Testing ----> #{attack_url}".red  #saurabh: comment this for less verbose output
 
         use_ssl = attack_url.include?  "https"
         resp = httpGETRequest(attack_url, :use_ssl => use_ssl)
@@ -257,7 +311,7 @@ private
       sleep 0.5
 
       if response and (response.code == "200" or response.code == "301")
-        puts ("Yatta, found default login credentials - #{username} / #{password}\n").green
+        puts ("Yatta, found default login credentials for #{url401} - #{username} / #{password}\n").green
         return username, password
       end
     end
@@ -292,7 +346,7 @@ private
     rescue OpenSSL::SSL::SSLError
       puts "#{$url}: SSL Error, site might not use SSL"
       #exit #Saurabh - This exit breaks execution of the script. Remaining port and hosts will not be tested. All other exit statements should be commented as well.
-    rescue Timeout::Error, Errno::ECONNREFUSED, Errno::ECONNRESET, SocketError
+    rescue Timeout::Error, Errno::ECONNREFUSED, Errno::ECONNRESET, SocketError, Errno::EHOSTUNREACH
       puts "#{$url}: Connection timed out or reset."
       #exit
     end
@@ -300,7 +354,6 @@ private
     return resp
   end
 end
-
 
 if __FILE__ == $0
   puts "#########################################################################################"
@@ -312,7 +365,7 @@ if __FILE__ == $0
        888       .8'     `888.  oo     .d8P  `88.    .8'  `88b    d88'
       o888o     o88o     o8888o 88888888P'     `YbodP'     `Y8bood8P'"
   puts "Welcome to Yasuo v#{VERSION}"
-  puts "Author: Saurabh Harit (@0xsauby) | Contribution & Coolness: Stephen Hall (@_stephen_h)"
+  puts "Author: Saurabh Harit (@0xsauby) | Contribution & Coolness: Stephen Hall (@logicalsec)"
   puts "#########################################################################################\n\n"
 
   options = OpenStruct.new
@@ -322,6 +375,7 @@ if __FILE__ == $0
   options.no_ping = false
   options.all_ports = false
   options.brute = ''
+  options.thread_count = 1
   options.paths_file = 'default-path.csv'  # TODO: add option to set this value
 
   OptionParser.new do |opts|
@@ -368,6 +422,15 @@ if __FILE__ == $0
       options.brute = brute
     end
 
+    opts.on("-t", "--threads [Max Thread Count]", "Max number of threads to be used") do |thread_count|
+      if thread_count.to_i > 0
+        options.thread_count = thread_count.to_i
+      else
+        puts "Please enter a positive value for the number of threads"
+        exit
+      end
+    end
+
     opts.on("-h", "--help", "-?", "--?", "Get Help") do |help|
       puts opts
       exit
@@ -406,6 +469,7 @@ if __FILE__ == $0
     options.ip_range,
     options.port_range,
     options.all_ports,
-    options.brute
+    options.brute,
+    options.thread_count
   ).run()
 end
