@@ -135,6 +135,7 @@ private
         host.each_port do |port|
           open_port = "#{port.state}" == "open"
           web_service = "#{port.service}".include?("http") or port.service == "websm" or "#{port.service}".include?("ssl")
+          wrapped_service = "#{port.service}".include?("tcpwrapped")
           if open_port and web_service
             open_ports += 1
 
@@ -158,6 +159,40 @@ private
               target_urls << target_uri
             else
               puts "#{target_uri} returns HTTP 200 or 401 for every requested resource. Ignoring it"
+            end
+          elsif open_port and wrapped_service
+            open_ports += 1
+
+            port_number = "#{port.number}"
+            port_service = "#{port.service}"
+
+            puts "Discovered tcpwrapped port: #{host.ip}:#{port_number}"
+
+            # Determine if the service is running SSL and begin to build appropriate URL
+            prefix     = "https" 
+            target_uri  = "#{prefix}://#{host.ip}:#{port_number}"
+            fake_uri    = "#{target_uri}/#{fake_path}"
+            fake_dir_uri = "#{target_uri}/#{fake_dir}"
+
+            fake_uri_resp = httpGETRequest(fake_uri, :use_ssl => true)
+            fake_dir_resp = httpGETRequest(fake_dir_uri, :use_ssl => true)
+
+            if (fake_uri_resp and fake_uri_resp.code != '200' and fake_uri_resp.code != '401' and fake_dir_resp and fake_dir_resp.code != '200' and fake_dir_resp.code != '401')
+              target_urls << target_uri
+            elsif (fake_uri_resp and fake_uri_resp.code == nil and fake_dir_resp.code == nil)
+              prefix     = "http" 
+              target_uri  = "#{prefix}://#{host.ip}:#{port_number}"
+              fake_uri    = "#{target_uri}/#{fake_path}"
+              fake_dir_uri = "#{target_uri}/#{fake_dir}"
+
+              fake_uri_resp = httpGETRequest(fake_uri)
+              fake_dir_resp = httpGETRequest(fake_dir_uri)
+
+              if (fake_uri_resp and fake_uri_resp.code != '200' and fake_uri_resp.code != '401' and fake_dir_resp and fake_dir_resp.code != '200' and fake_dir_resp.code != '401')
+                target_urls << target_uri
+              else
+                puts "#{target_uri} returns HTTP 200 or 401 for every requested resource. Ignoring it"
+              end
             end
           end
         end
@@ -194,7 +229,6 @@ private
   end
 
   def find_vulnerable_applications(target_urls)
-    puts target_urls.size
     #Randomizing the array to distribute load. Go stealth or go home.
     target_urls = target_urls.shuffle
 
