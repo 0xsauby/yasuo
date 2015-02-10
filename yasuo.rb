@@ -179,7 +179,7 @@ private
 
             if (fake_uri_resp and fake_uri_resp.code != '200' and fake_uri_resp.code != '401' and fake_dir_resp and fake_dir_resp.code != '200' and fake_dir_resp.code != '401')
               target_urls << target_uri
-            elsif (fake_uri_resp and fake_uri_resp.code == nil and fake_dir_resp.code == nil)
+            else
               prefix     = "http" 
               target_uri  = "#{prefix}://#{host.ip}:#{port_number}"
               fake_uri    = "#{target_uri}/#{fake_path}"
