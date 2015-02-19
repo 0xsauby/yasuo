@@ -179,7 +179,7 @@ private
 
             if (fake_uri_resp and fake_uri_resp.code != '200' and fake_uri_resp.code != '401' and fake_dir_resp and fake_dir_resp.code != '200' and fake_dir_resp.code != '401')
               target_urls << target_uri
-            elsif (fake_uri_resp and fake_uri_resp.code == nil and fake_dir_resp.code == nil)
+            else
               prefix     = "http" 
               target_uri  = "#{prefix}://#{host.ip}:#{port_number}"
               fake_uri    = "#{target_uri}/#{fake_path}"
@@ -278,6 +278,23 @@ private
             @info.push([attack_url, script, creds[0], creds[1]])
             break
 
+          when "403"
+            #This case may result in more false positives, but the behaviour was seen were you get a 403 and it takes you to a login.
+            #
+            target_urls.delete_at(myindex)
+            
+            if not resp.body.scan(/<form/i).empty? and not resp.body.scan(/login/i).empty?
+              puts "Yasuo found - #{attack_url}. Says not authorized but may contain login page".green
+              if @brute_force_mode == 'form' or @brute_force_mode == 'all'
+                puts "Double-checking if the application implements a login page and initiating login bruteforce attack, hold on tight..."
+                creds = LoginFormBruteForcer::brute_by_force(attack_url)
+              else
+                creds = ["N/A", "N/A"]
+              end
+            @info.push([attack_url, script, creds[0], creds[1]])
+            end
+            break
+            
           when "401"
             target_urls.delete_at(myindex)
 
