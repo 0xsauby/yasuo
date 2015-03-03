@@ -204,9 +204,14 @@ private
       end
     end
 
-   slice_size = (target_urls.size/Float(@thread_count)).ceil
-   thread_list = target_urls.each_slice(slice_size).to_a
-
+    if !target_urls.empty?
+      slice_size = (target_urls.size/Float(@thread_count)).ceil
+      thread_list = target_urls.each_slice(slice_size).to_a
+    else
+      puts "Yasuo did not find any potential hosts to perform enumeration on".red
+      exit
+      
+    end
    threads = []
    @thread_count.times do |i|
       if thread_list[i] != nil
