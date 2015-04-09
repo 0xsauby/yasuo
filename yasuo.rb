@@ -35,7 +35,7 @@ require "thread"
 require File.dirname(File.realpath(__FILE__)) + '/resp200.rb'
 
 
-VERSION = '1.0'
+VERSION = '1.2'
 
 
 class Scanner
