@@ -244,13 +244,11 @@ private
     # where we will store all the creds we find
     creds = []
 
-    CSV.foreach(@paths_filename) do |row|
-      default_path = row[0].strip
-      script = row[1]
-
-      target_urls.each_with_index do |url, myindex|
-        attack_url = url + default_path
-
+    target_urls.each do |baseurl|
+      CSV.foreach(@paths_filename) do |row|
+        default_path = row[0].strip
+        script = row[1]
+        attack_url = baseurl + default_path
         puts "Testing ----> #{attack_url}".red  #saurabh: comment this for less verbose output
 
         use_ssl = attack_url.include?  "https"
@@ -266,8 +264,6 @@ private
         if resp
           case resp.code
           when "200"
-            target_urls.delete_at(myindex)
-
             if not resp.body.scan(/<form/i).empty? and not resp.body.scan(/login/i).empty?
               puts "Yasuo found - #{attack_url}. May require form based auth".green
               if @brute_force_mode == 'form' or @brute_force_mode == 'all'
@@ -285,9 +281,6 @@ private
 
           when "403"
             #This case may result in more false positives, but the behaviour was seen were you get a 403 and it takes you to a login.
-            #
-            target_urls.delete_at(myindex)
-            
             if not resp.body.scan(/<form/i).empty? and not resp.body.scan(/login/i).empty?
               puts "Yasuo found - #{attack_url}. Says not authorized but may contain login page".green
               if @brute_force_mode == 'form' or @brute_force_mode == 'all'
@@ -301,8 +294,6 @@ private
             break
             
           when "401"
-            target_urls.delete_at(myindex)
-
             puts "Yasuo found - #{attack_url}. Requires HTTP basic auth".green
             if @brute_force_mode == 'basic' or @brute_force_mode == 'all'
               puts "Initiating login bruteforce attack, hold on tight..."
