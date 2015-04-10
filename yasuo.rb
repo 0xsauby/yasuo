@@ -35,7 +35,7 @@ require "thread"
 require File.dirname(File.realpath(__FILE__)) + '/resp200.rb'
 
 
-VERSION = '1.2'
+VERSION = '1.0'
 
 
 class Scanner
@@ -244,11 +244,13 @@ private
     # where we will store all the creds we find
     creds = []
 
-    target_urls.each do |baseurl|
-      CSV.foreach(@paths_filename) do |row|
-        default_path = row[0].strip
-        script = row[1]
-        attack_url = baseurl + default_path
+    CSV.foreach(@paths_filename) do |row|
+      default_path = row[0].strip
+      script = row[1]
+
+      target_urls.each_with_index do |url, myindex|
+        attack_url = url + default_path
+
         puts "Testing ----> #{attack_url}".red  #saurabh: comment this for less verbose output
 
         use_ssl = attack_url.include?  "https"
@@ -277,7 +279,7 @@ private
               creds = ["None", "None"]
             end
             @info.push([attack_url, script, creds[0], creds[1]])
-            break
+            #break
 
           when "403"
             #This case may result in more false positives, but the behaviour was seen were you get a 403 and it takes you to a login.
@@ -291,7 +293,7 @@ private
               end
             @info.push([attack_url, script, creds[0], creds[1]])
             end
-            break
+            #break
             
           when "401"
             puts "Yasuo found - #{attack_url}. Requires HTTP basic auth".green
@@ -302,7 +304,7 @@ private
               creds = ["N/A", "N/A"]
             end
             @info.push([attack_url, script, creds[0], creds[1]])
-            break
+            #break
 
           when "404"
             next
