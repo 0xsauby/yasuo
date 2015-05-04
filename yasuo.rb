@@ -64,6 +64,12 @@ class Scanner
     # Number of threads to use with the scanner.
     @thread_count = number_of_threads
 
+    # Total count of open ports
+    @open_ports = 0
+
+    # List of every base URLs to target
+    @target_urls = []
+
     # stores vulnerable applications that were found
     @info = [
       ["URL to Application", "Potential Exploit", "Username", "Password"]
@@ -120,74 +126,40 @@ private
   end
 
   def process_nmap_scan
-    fake_path = 'thisfilecanneverexistwtf.txt'
-    fake_dir = 'thisfilecanneverexistwtf/'
-
-    target_urls = []
 
     puts "Using nmap scan output file #{@nmap_filename}"
 
-    Nmap::XML.new(@nmap_filename) do |xml|
-      xml.each_host do |host|
-        puts "\n<<<Testing host - #{host.ip}>>>".red
+    xml = Nmap::XML.new(@nmap_filename)
 
-        open_ports = 0
-        host.each_port do |port|
-          open_port = "#{port.state}" == "open"
-          web_service = ("#{port.service}".include?("http") or port.service == "websm" or port.service.ssl?)
-          wrapped_service = "#{port.service}".include?("tcpwrapped")
+    slice_size = (xml.hosts.size/Float(@thread_count)).ceil
+    thread_list = xml.hosts.each_slice(slice_size).to_a
 
-          next unless open_port and (web_service or wrapped_service)
-          open_ports += 1
-
-          if wrapped_service
-            status = "tcpwrapped"
-            schemes = ["https", "http"]
-          else
-            status = "open"
-            if port.service.ssl?
-              schemes = ["https"]
-            else
-              schemes = ["http"]
-            end
-          end
-
-          schemes.each do |scheme|
-            puts "Discovered #{status} port: #{host.ip}:#{port.number}"
-
-            target_uri = "#{scheme}://#{host.ip}:#{port.number}"
-
-            fake_uri     = "#{target_uri}/#{fake_path}"
-            fake_dir_uri = "#{target_uri}/#{fake_dir}"
-
-            use_ssl = (scheme == "https")
-            fake_uri_resp = httpGETRequest(fake_uri, :use_ssl => use_ssl)
-            fake_dir_resp = httpGETRequest(fake_dir_uri, :use_ssl => use_ssl)
-
-            if (fake_uri_resp and fake_uri_resp.code != '200' and fake_uri_resp.code != '401' and
-                fake_dir_resp and fake_dir_resp.code != '200' and fake_dir_resp.code != '401')
-              target_urls << target_uri
-              break
-            end
-
-          end and puts "#{host.ip}:#{port.number} over #{schemes.join(' or ')} returns HTTP 200 or 401 for every requested resource. Ignoring it"
-        end
-
-        if open_ports.zero?
-          puts "Either all the ports were closed or Yasuo did not find any web-based services.\n".red
-          puts "Check #{@nmap_filename} for scan output\n".red
+    threads = []
+    @thread_count.times do |i|
+      if thread_list[i] != nil
+        threads << Thread.new do
+          detect_targets(thread_list[i])
         end
       end
     end
 
-    if !target_urls.empty?
-      slice_size = (target_urls.size/Float(@thread_count)).ceil
-      thread_list = target_urls.each_slice(slice_size).to_a
+    threads.each do |scan_thread|
+      scan_thread.join
+    end
+
+    if @open_ports.zero?
+      puts "Either all the ports were closed or Yasuo did not find any web-based services.\n".red
+      puts "Check #{@nmap_filename} for scan output\n".red
+    end
+
+    if !@target_urls.empty?
+      slice_size = (@target_urls.size/Float(@thread_count)).ceil
+      thread_list = @target_urls.each_slice(slice_size).to_a
     else
       puts "Yasuo did not find any potential hosts to perform enumeration on".red
       exit
-      
     end
+
    threads = []
    @thread_count.times do |i|
       if thread_list[i] != nil
@@ -211,6 +183,56 @@ private
     puts "<<<Yasuo discovered following vulnerable applications>>>".red
     puts "--------------------------------------------------------"
     puts @info.to_table(:first_row_is_head => true)
+  end
+
+  def detect_targets(hosts)
+    fake_path = 'thisfilecanneverexistwtf.txt'
+    fake_dir = 'thisfilecanneverexistwtf/'
+
+    hosts.each do |host|
+      puts "\n<<<Testing host - #{host.ip}>>>".red
+
+      host.each_port do |port|
+        open_port = "#{port.state}" == "open"
+        web_service = ("#{port.service}".include?("http") or port.service == "websm" or port.service.ssl?)
+        wrapped_service = "#{port.service}".include?("tcpwrapped")
+
+        next unless open_port and (web_service or wrapped_service)
+        @open_ports += 1
+
+        if wrapped_service
+          status = "tcpwrapped"
+          schemes = ["https", "http"]
+        else
+          status = "open"
+          if port.service.ssl?
+            schemes = ["https"]
+          else
+            schemes = ["http"]
+          end
+        end
+
+        schemes.each do |scheme|
+          puts "Discovered #{status} port: #{host.ip}:#{port.number}"
+
+          target_uri = "#{scheme}://#{host.ip}:#{port.number}"
+
+          fake_uri     = "#{target_uri}/#{fake_path}"
+          fake_dir_uri = "#{target_uri}/#{fake_dir}"
+
+          use_ssl = (scheme == "https")
+          fake_uri_resp = httpGETRequest(fake_uri, :use_ssl => use_ssl)
+          fake_dir_resp = httpGETRequest(fake_dir_uri, :use_ssl => use_ssl)
+
+          if (fake_uri_resp and fake_uri_resp.code != '200' and fake_uri_resp.code != '401' and
+              fake_dir_resp and fake_dir_resp.code != '200' and fake_dir_resp.code != '401')
+            @target_urls.push(target_uri)
+            break
+          end
+
+        end and puts "#{host.ip}:#{port.number} over #{schemes.join(' or ')} returns HTTP 200 or 401 for every requested resource. Ignoring it"
+      end
+    end
   end
 
   def find_vulnerable_applications(target_urls)
