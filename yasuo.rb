@@ -134,18 +134,17 @@ private
         open_ports = 0
         host.each_port do |port|
           open_port = "#{port.state}" == "open"
-          web_service = "#{port.service}".include?("http") or port.service == "websm" or "#{port.service}".include?("ssl")
+          web_service = ("#{port.service}".include?("http") or port.service == "websm" or port.service.ssl?)
           wrapped_service = "#{port.service}".include?("tcpwrapped")
           if open_port and web_service
             open_ports += 1
 
             port_number = "#{port.number}"
-            port_service = "#{port.service}"
 
             puts "Discovered open port: #{host.ip}:#{port_number}"
 
             # Determine if the service is running SSL and begin to build appropriate URL
-            use_ssl    = port_service.include?("https") or port_service.include?("ssl")
+            use_ssl    = port.service.ssl?
             prefix     = use_ssl ? "https" : "http"
             target_uri  = "#{prefix}://#{host.ip}:#{port_number}"
             fake_uri    = "#{target_uri}/#{fake_path}"
@@ -164,7 +163,6 @@ private
             open_ports += 1
 
             port_number = "#{port.number}"
-            port_service = "#{port.service}"
 
             puts "Discovered tcpwrapped port: #{host.ip}:#{port_number}"
 
