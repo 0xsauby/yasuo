@@ -136,63 +136,41 @@ private
           open_port = "#{port.state}" == "open"
           web_service = ("#{port.service}".include?("http") or port.service == "websm" or port.service.ssl?)
           wrapped_service = "#{port.service}".include?("tcpwrapped")
-          if open_port and web_service
-            open_ports += 1
 
-            port_number = "#{port.number}"
+          next unless open_port and (web_service or wrapped_service)
+          open_ports += 1
 
-            puts "Discovered open port: #{host.ip}:#{port_number}"
+          if wrapped_service
+            status = "tcpwrapped"
+            schemes = ["https", "http"]
+          else
+            status = "open"
+            if port.service.ssl?
+              schemes = ["https"]
+            else
+              schemes = ["http"]
+            end
+          end
 
-            # Determine if the service is running SSL and begin to build appropriate URL
-            use_ssl    = port.service.ssl?
-            prefix     = use_ssl ? "https" : "http"
-            target_uri  = "#{prefix}://#{host.ip}:#{port_number}"
-            fake_uri    = "#{target_uri}/#{fake_path}"
+          schemes.each do |scheme|
+            puts "Discovered #{status} port: #{host.ip}:#{port.number}"
+
+            target_uri = "#{scheme}://#{host.ip}:#{port.number}"
+
+            fake_uri     = "#{target_uri}/#{fake_path}"
             fake_dir_uri = "#{target_uri}/#{fake_dir}"
 
+            use_ssl = (scheme == "https")
             fake_uri_resp = httpGETRequest(fake_uri, :use_ssl => use_ssl)
             fake_dir_resp = httpGETRequest(fake_dir_uri, :use_ssl => use_ssl)
 
             if (fake_uri_resp and fake_uri_resp.code != '200' and fake_uri_resp.code != '401' and
                 fake_dir_resp and fake_dir_resp.code != '200' and fake_dir_resp.code != '401')
               target_urls << target_uri
-            else
-              puts "#{target_uri} returns HTTP 200 or 401 for every requested resource. Ignoring it"
+              break
             end
-          elsif open_port and wrapped_service
-            open_ports += 1
 
-            port_number = "#{port.number}"
-
-            puts "Discovered tcpwrapped port: #{host.ip}:#{port_number}"
-
-            # Determine if the service is running SSL and begin to build appropriate URL
-            prefix     = "https" 
-            target_uri  = "#{prefix}://#{host.ip}:#{port_number}"
-            fake_uri    = "#{target_uri}/#{fake_path}"
-            fake_dir_uri = "#{target_uri}/#{fake_dir}"
-
-            fake_uri_resp = httpGETRequest(fake_uri, :use_ssl => true)
-            fake_dir_resp = httpGETRequest(fake_dir_uri, :use_ssl => true)
-
-            if (fake_uri_resp and fake_uri_resp.code != '200' and fake_uri_resp.code != '401' and fake_dir_resp and fake_dir_resp.code != '200' and fake_dir_resp.code != '401')
-              target_urls << target_uri
-            else
-              prefix     = "http" 
-              target_uri  = "#{prefix}://#{host.ip}:#{port_number}"
-              fake_uri    = "#{target_uri}/#{fake_path}"
-              fake_dir_uri = "#{target_uri}/#{fake_dir}"
-
-              fake_uri_resp = httpGETRequest(fake_uri)
-              fake_dir_resp = httpGETRequest(fake_dir_uri)
-
-              if (fake_uri_resp and fake_uri_resp.code != '200' and fake_uri_resp.code != '401' and fake_dir_resp and fake_dir_resp.code != '200' and fake_dir_resp.code != '401')
-                target_urls << target_uri
-              else
-                puts "#{target_uri} returns HTTP 200 or 401 for every requested resource. Ignoring it"
-              end
-            end
-          end
+          end and puts "#{host.ip}:#{port.number} over #{schemes.join(' or ')} returns HTTP 200 or 401 for every requested resource. Ignoring it"
         end
 
         if open_ports.zero?
