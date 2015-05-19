@@ -87,7 +87,7 @@
 /dolibarr/,./exploits/linux/http/dolibarr_cmd_exec.rb
 /ctc/servlet,./auxiliary/admin/sap/sap_configservlet_exec_noauth.rb
 /users/password,./auxiliary/admin/http/rails_devise_pass_reset.rb
-/apply.cgi,./auxiliary/admin/http/linksys_wrt54gl_exec.rb,
+/apply.cgi,./auxiliary/admin/http/linksys_wrt54gl_exec.rb
 /seam-booking/home.seam,./auxiliary/admin/http/jboss_seam_exec.rb
 /cgi-bin/admin.cgi,./auxiliary/admin/http/scrutinizer_add_user.rb
 /openbravo/,./auxiliary/admin/http/openbravo_xxe.rb
