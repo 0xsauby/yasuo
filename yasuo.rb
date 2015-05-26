@@ -128,6 +128,8 @@ private
   def process_nmap_scan
 
     puts "Using nmap scan output file #{@nmap_filename}"
+    @target_urls = []
+    @open_ports = 0
 
     xml = Nmap::XML.new(@nmap_filename)
 
@@ -194,7 +196,7 @@ private
 
       host.each_port do |port|
         open_port = "#{port.state}" == "open"
-        web_service = ("#{port.service}".include?("http") or port.service == "websm" or port.service.ssl?)
+        web_service = ("#{port.service}".include?("http") or port.service == "websm" or "#{port.service}".include?("ssl"))
         wrapped_service = "#{port.service}".include?("tcpwrapped")
 
         next unless open_port and (web_service or wrapped_service)
@@ -205,7 +207,7 @@ private
           schemes = ["https", "http"]
         else
           status = "open"
-          if port.service.ssl?
+          if ("#{port.service}".include?("ssl") or "#{port.service}".include?("https"))
             schemes = ["https"]
           else
             schemes = ["http"]

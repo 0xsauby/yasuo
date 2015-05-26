@@ -1,6 +1,7 @@
 manager
 role1
 admin
+pass
 zabbix
 root
 tomcat
