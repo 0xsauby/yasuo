@@ -116,3 +116,8 @@
 /dolibarr/,./auxiliary/gather/doliwamp_traversal_creds.rb
 /portal,./auxiliary/gather/apache_rave_creds.rb
 /drupal,./auxiliary/gather/drupal_openid_xxe.rb
+/live/index.html?Language=0,blank
+/view/viewer_index.shtml,blank
+/setup/system/system.html,blank
+/userAdmin.php,blank
+/localplay.php,blank
