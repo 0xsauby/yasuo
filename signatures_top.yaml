@@ -1,0 +1,48 @@
+#This file contains the application signatures - unique application path, version string, application name. The format is specified below:
+#AppName: 'JBoss jmx-console'
+#  - 'unique_app_path_1'
+#  - 'unique_app_path_2'
+#  - 'version string'
+#  - 'exploit_path'
+
+JBoss jmx-console:
+  path1: '/jmx-console'
+  path2: '/jmx-console/'
+  vstring: ''
+  exppath: './exploit/multi/http/jboss_deploymentfilerepository'
+
+Apache Tomcat:
+  path1: '/manager/html'
+  path2: '/manager'
+  vstring: ''
+  exppath: './exploits/multi/http/tomcat_mgr_upload.rb'
+
+Testlink:
+  path1: '/testlink-1.9.3/login.php'
+  path2: '/testlink/login.php'
+  vstring: ''
+  exppath: './exploits/multi/http/testlink_upload_exec.rb'
+
+Hudson Jenkins:
+  path1: '/jenkins/'
+  path2: '/script'
+  vstring: ''
+  exppath: './auxiliary/scanner/http/jenkins_enum.rb'
+
+Apache Axis2:
+  path1: '/axis2/axis2-admin'
+  path2: ''
+  vstring: ''
+  exppath: 'blank'
+
+Zabbix:
+  path1: '/zabbix/'
+  path2: '/zabbix'
+  vstring: ''
+  exppath: './exploits/multi/http/zabbix_script_exec.rb'
+
+MediaWiki:
+  path1: '/mediawiki/index.php?title=Special:UserLogin&returnto=Main_Page'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/multi/http/mediawiki_thumb.rb'

@@ -31,15 +31,42 @@ require "ostruct"
 require "text-table"
 require "uri"
 require "thread"
+require 'yaml'
+require 'logger'
 
-require File.dirname(File.realpath(__FILE__)) + '/resp200.rb'
+require File.dirname(File.realpath(__FILE__)) + '/formloginbrute.rb'
 
 
-VERSION = '1.3'
+VERSION = '2.0'
 
+class MultiDelegator
+  def initialize(*targets)
+    @targets = targets
+  end
+
+  def self.delegate(*methods)
+    methods.each do |m|
+      define_method(m) do |*args|
+        @targets.map { |t| t.send(m, *args) }
+      end
+    end
+    self
+  end
+
+  class <<self
+    alias to new
+  end
+end
 
 class Scanner
   def initialize(paths_filename, nmap_filename, target_ips_range, scan_port_range, scan_all_ports, brute_force_mode, number_of_threads)
+    #Logger
+    yasuolog = 'yasuo_output_' + Time.now.gmtime.to_s.gsub(/\W/,'') + '.log'
+    $log_file = File.open(yasuolog, "a")
+    $logboth = Logger.new MultiDelegator.delegate(:write, :close).to(STDOUT, $log_file)
+    $logfile = Logger.new MultiDelegator.delegate(:write, :close).to($log_file)
+    $logconsole = Logger.new MultiDelegator.delegate(:write, :close).to(STDOUT)
+
     # vulnerable applications signatures
     @paths_filename = paths_filename
 
@@ -64,23 +91,16 @@ class Scanner
     # Number of threads to use with the scanner.
     @thread_count = number_of_threads
 
-    # Total count of open ports
-    @open_ports = 0
-
-    # List of every base URLs to target
-    @target_urls = []
-
     # stores vulnerable applications that were found
     @info = [
-      ["URL to Application", "Potential Exploit", "Username", "Password"]
+      ["App Name", "URL to Application", "Potential Exploit", "Username", "Password"]
     ]
   end
 
   def run
     # logic to determine if scan is performed
     if @nmap_filename.empty?
-      puts "Initiating port scan"
-      puts "----------------------\n"
+      $logboth.info("Initiating port scan")
       nmap_scan
     end
 
@@ -127,7 +147,7 @@ private
 
   def process_nmap_scan
 
-    puts "Using nmap scan output file #{@nmap_filename}"
+    $logboth.info("Using nmap scan output file #{@nmap_filename}")
     @target_urls = []
     @open_ports = 0
 
@@ -150,15 +170,15 @@ private
     end
 
     if @open_ports.zero?
-      puts "Either all the ports were closed or Yasuo did not find any web-based services.\n".red
-      puts "Check #{@nmap_filename} for scan output\n".red
+      $logfile.warn("Either all the ports were closed or Yasuo did not find any web-based services.\n")
+      $logfile.warn("Check #{@nmap_filename} for scan output\n")
     end
 
     if !@target_urls.empty?
       slice_size = (@target_urls.size/Float(@thread_count)).ceil
       thread_list = @target_urls.each_slice(slice_size).to_a
     else
-      puts "Yasuo did not find any potential hosts to perform enumeration on".red
+      $logboth.warn("Yasuo did not find any potential hosts to enumerate")
       exit
     end
 
@@ -167,8 +187,7 @@ private
       if thread_list[i] != nil
         threads << Thread.new do
           if i == 0
-            puts "\n<<<Enumerating vulnerable applications>>>".red
-            puts "-------------------------------------------\n"
+            $logboth.info("<<<Enumerating vulnerable applications>>>")
           end
           find_vulnerable_applications(thread_list[i])
         end
@@ -179,10 +198,16 @@ private
       scan_thread.join
     end
 
+    #Shitty shitty logging
+    $logfile.info("--------------------------------------------------------")
+    $logfile.info("<<<Yasuo discovered following vulnerable applications>>>")
+    $logfile.info("--------------------------------------------------------")
+    $logfile.info("#{@info}")
+
     puts ""
     puts ""
     puts "--------------------------------------------------------"
-    puts "<<<Yasuo discovered following vulnerable applications>>>".red
+    puts "<<<Yasuo discovered following vulnerable applications>>>".green
     puts "--------------------------------------------------------"
     puts @info.to_table(:first_row_is_head => true)
   end
@@ -192,7 +217,8 @@ private
     fake_dir = 'thisfilecanneverexistwtf/'
 
     hosts.each do |host|
-      puts "\n<<<Testing host - #{host.ip}>>>".red
+      $logfile.info("<<<Testing host - #{host.ip}>>>")
+      #puts "\n<<<Testing host - #{host.ip}>>>".red
 
       host.each_port do |port|
         open_port = "#{port.state}" == "open"
@@ -215,7 +241,7 @@ private
         end
 
         schemes.each do |scheme|
-          puts "Discovered #{status} port: #{host.ip}:#{port.number}"
+          $logboth.info("Discovered #{status} port: #{host.ip}:#{port.number}")
 
           target_uri = "#{scheme}://#{host.ip}:#{port.number}"
 
@@ -232,10 +258,10 @@ private
             break
           end
 
-        end and puts "#{host.ip}:#{port.number} over #{schemes.join(' or ')} returns HTTP 200 or 401 for every requested resource. Ignoring it"
+        end and $logfile.info("#{host.ip}:#{port.number} over #{schemes.join(' or ')} returns HTTP 200 or 401 for every requested resource. Ignoring it")
       end
     end
-  end
+  end  
 
   def find_vulnerable_applications(target_urls)
     #Randomizing the array to distribute load. Go stealth or go home.
@@ -244,17 +270,33 @@ private
     # where we will store all the creds we find
     creds = []
 
-    CSV.foreach(@paths_filename) do |row|
-      default_path = row[0].strip
-      script = row[1]
+    #Reading the signatures.yaml file
+    @read_sigs = YAML.load_file(@paths_filename)
+
+    @read_sigs.each_key { |appkey|
+      default_path_1 = @read_sigs[appkey]['path1'].strip
+      default_path_2 = @read_sigs[appkey]['path2'].strip
+      version_string = @read_sigs[appkey]['vstring'].strip
+      exploit_path = @read_sigs[appkey]['exppath'].strip
 
       target_urls.each_with_index do |url, myindex|
-        attack_url = url + default_path
+        attack_url = url + default_path_1
 
-        puts "Testing ----> #{attack_url}".red  #saurabh: comment this for less verbose output
+        $logfile.info("Testing ----> [#{appkey}] #{attack_url}")
+        #puts "Testing ----> [#{appkey}] #{attack_url}".red  #saurabh: comment this for less verbose output
 
         use_ssl = attack_url.include?  "https"
         resp = httpGETRequest(attack_url, :use_ssl => use_ssl)
+
+        if ((resp.code != "200" and resp.code != "401" and resp.code != "403") and (default_path_2 != '' and resp != nil))
+          $logfile.info("<<<Primary path {#{attack_url}} was not found, looking for secondary path>>>")
+          #puts "<<<Primary path {#{attack_url}} was not found, looking for secondary path>>>".red
+          attack_url = url + default_path_2
+          $logfile.info("Testing ----> [#{appkey}] #{attack_url}")
+          #puts "Testing ----> [#{appkey}] #{attack_url}".red
+          resp = httpGETRequest(attack_url, :use_ssl => use_ssl)
+        end
+
         if resp and resp.code == "301"
           if resp.header['location'].include? "http"
             resp = httpGETRequest(resp.header['location'], :use_ssl => use_ssl)
@@ -266,44 +308,80 @@ private
         if resp
           case resp.code
           when "200"
+            target_urls.delete_at(myindex)
+
             if not resp.body.scan(/<form/i).empty? and not resp.body.scan(/login/i).empty?
-              puts "Yasuo found - #{attack_url}. May require form based auth".green
+              $logfile.info("Yasuo found #{appkey} at #{attack_url}. May require form based auth")
+              puts "Yasuo found #{appkey} at #{attack_url}. May require form based auth".green
               if @brute_force_mode == 'form' or @brute_force_mode == 'all'
-                puts "Double-checking if the application implements a login page and initiating login bruteforce attack, hold on tight..."
+                $logboth.info("Double-checking if the application implements a login page and initiating login bruteforce, hold on tight...")
                 creds = LoginFormBruteForcer::brute_by_force(attack_url)
               else
                 creds = ["N/A", "N/A"]
               end
             else
-              puts "Yasuo found - #{attack_url}. No authentication required".green
+              $logfile.info("Yasuo found an unauthenticated instance of #{appkey} at #{attack_url}.")
+              puts "Yasuo found an unauthenticated instance of #{appkey} at #{attack_url}.".green
               creds = ["None", "None"]
             end
-            @info.push([attack_url, script, creds[0], creds[1]])
+
+            if not version_string.empty?
+              $logboth.info("Checking if the detected application has the same version as specified in the signature file")
+              if not resp.body.scan(/#{version_string}/i).empty?
+                $logboth.info("Its a match. Version: #{version_string}.strip")
+              else
+                $logboth.info("The version string specified in the signature file did not match with the version of detected application.")
+              end
+            end
+
+            @info.push([appkey, attack_url, exploit_path, creds[0], creds[1]])
             #break
 
           when "403"
-            #This case may result in more false positives, but the behaviour was seen were you get a 403 and it takes you to a login.
+            #This case may result in more false positives, but the behaviour was seen where you get a 403 and it takes you to a login.
+            #
+            target_urls.delete_at(myindex)
+            
             if not resp.body.scan(/<form/i).empty? and not resp.body.scan(/login/i).empty?
-              puts "Yasuo found - #{attack_url}. Says not authorized but may contain login page".green
+              puts "Yasuo found #{appkey} at #{attack_url}. Says not authorized but may contain login page".green
               if @brute_force_mode == 'form' or @brute_force_mode == 'all'
-                puts "Double-checking if the application implements a login page and initiating login bruteforce attack, hold on tight..."
+                $logboth.info("Double-checking if the application implements a login page and initiating login bruteforce attack, hold on tight...")
                 creds = LoginFormBruteForcer::brute_by_force(attack_url)
               else
                 creds = ["N/A", "N/A"]
               end
-            @info.push([attack_url, script, creds[0], creds[1]])
             end
+            if not version_string.empty?
+              $logboth.info("Checking if the detected application has the same version as specified in the signature file")
+              if not resp.body.scan(/#{version_string}/i).empty?
+                $logboth.info("Its a match. Version: #{version_string}.strip")
+              else
+                $logboth.info("The version string specified in the signature file did not match with the version of detected application.")
+              end
+            end
+            @info.push([appkey, attack_url, exploit_path, creds[0], creds[1]])
             #break
             
           when "401"
-            puts "Yasuo found - #{attack_url}. Requires HTTP basic auth".green
+            target_urls.delete_at(myindex)
+
+            $logfile.info("Yasuo found #{appkey} at #{attack_url}. Requires HTTP basic auth")
+            puts "Yasuo found #{appkey} at #{attack_url}. Requires HTTP basic auth".green
             if @brute_force_mode == 'basic' or @brute_force_mode == 'all'
-              puts "Initiating login bruteforce attack, hold on tight..."
+              $logboth.info("Initiating login bruteforce, hold on tight...")
               creds = brute_force_basic_auth(attack_url)
             else
               creds = ["N/A", "N/A"]
             end
-            @info.push([attack_url, script, creds[0], creds[1]])
+            if not version_string.empty?
+              $logboth.info("Checking if the detected application has the same version as specified in the signature file")
+              if not resp.body.scan(/#{version_string}/i).empty?
+                $logboth.info("Its a match. Version: #{version_string}.strip")
+              else
+                $logboth.info("The version string specified in the signature file did not match with the version of detected application.")
+              end
+            end
+            @info.push([appkey, attack_url, exploit_path, creds[0], creds[1]])
             #break
 
           when "404"
@@ -311,10 +389,10 @@ private
           end
         end
       end
-    end
+    }
   end
 
-  # TODO: this is very similar to brute_by_force in resp200.
+  # TODO: this is very similar to brute_by_force in formloginbrute.
   def brute_force_basic_auth(url401)
     url = URI.parse(url401)
 
@@ -326,11 +404,13 @@ private
       sleep 0.5
 
       if response and (response.code == "200" or response.code == "301")
+        $logfile.info("Yatta, found default login credentials for #{url401} - #{username} / #{password}\n")
         puts ("Yatta, found default login credentials for #{url401} - #{username} / #{password}\n").green
         return username, password
       end
     end
 
+    $logfile.info("Could not find default credentials, sucks")
     puts "Could not find default credentials, sucks".red
     return "Not Found", "Not Found"
   end
@@ -359,11 +439,9 @@ private
     rescue IOError, Errno::EINVAL, EOFError, Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, Net::ProtocolError, Net::HTTP::Persistent::Error
       #exit
     rescue OpenSSL::SSL::SSLError
-      puts "#{$url}: SSL Error, site might not use SSL"
-      #exit #Saurabh - This exit breaks execution of the script. Remaining port and hosts will not be tested. All other exit statements should be commented as well.
+      $logfile.info("#{$url}: SSL Error, site might not use SSL")
     rescue Timeout::Error, Errno::ECONNREFUSED, Errno::ECONNRESET, SocketError, Errno::EHOSTUNREACH
-      puts "#{$url}: Connection timed out or reset."
-      #exit
+      $logfile.info("#{$url}: Connection timed out or reset.")
     end
 
     return resp
@@ -391,12 +469,13 @@ if __FILE__ == $0
   options.all_ports = false
   options.brute = ''
   options.thread_count = 1
-  options.paths_file = 'default-path.csv'  # TODO: add option to set this value
+  options.paths_file = ''
+  #options.vomit = false
 
   OptionParser.new do |opts|
     opts.banner = "Yasuo #{VERSION}"
 
-    opts.on("-s", "--path-signatures", "CSV file of vulnerable app signatures") do |file|
+    opts.on("-s", "--path-signatures [FILE]", "YAML file containing signatures of vulnerable apps [Default - signatures.yaml]") do |file|
       options.paths_file = file
     end
 
@@ -455,6 +534,11 @@ if __FILE__ == $0
       puts "Yasuo #{VERSION}"
       exit
     end
+
+    #opts.on("--vomit", "Enable vomit mode to display all debug messages") do |vomit|
+    #  options.vomit = true
+    #end
+
   end.parse!(ARGV)
 
   unless options.nmap_file.length > 1 || options.ip_range.length > 1
@@ -466,16 +550,25 @@ if __FILE__ == $0
     exit
   end
 
-  if not File.exists?(options.paths_file)
-    puts "Yasou needs a CSV file of path signatures to function.".red
-    exit
+  unless options.paths_file.length > 1
+    options.paths_file = 'signatures.yaml'
   end
 
+  if not File.exists?(options.paths_file)
+    puts "Yasuo needs a YAML file of path signatures to function.".red
+    #$logboth.info('Yasuo needs a YAML file of path signatures to function.')
+    exit
+  end
 
   if not options.brute.empty? and (not File.exists?('users.txt') or not File.exists?('pass.txt'))
-    puts "If you want to do bruteforcing please ensure you have both files users.txt and pass.txt".red
+    puts "If you want to brute-force app authentication, ensure that you have both files users.txt and pass.txt".red
     exit
   end
+
+  #$spray = false
+  #if options.vomit == true
+  #  $spray = true
+  #end
 
   # Let's go!
   Scanner.new(

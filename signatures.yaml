@@ -1,0 +1,720 @@
+#This file contains the application signatures - unique application path, version string, application name. The format is specified below:
+#AppName: 'JBoss jmx-console'
+#  - 'unique_app_path_1'
+#  - 'unique_app_path_2'
+#  - 'version string'
+#  - 'exploit_path'
+
+JBoss jmx-console:
+  path1: '/jmx-console'
+  path2: '/jmx-console/'
+  vstring: ''
+  exppath: './exploit/multi/http/jboss_deploymentfilerepository'
+
+Apache Tomcat:
+  path1: '/manager/html'
+  path2: '/manager'
+  vstring: ''
+  exppath: './exploits/multi/http/tomcat_mgr_upload.rb'
+
+Testlink:
+  path1: '/testlink-1.9.3/login.php'
+  path2: '/testlink/login.php'
+  vstring: ''
+  exppath: './exploits/multi/http/testlink_upload_exec.rb'
+
+Hudson Jenkins:
+  path1: '/jenkins/'
+  path2: '/script'
+  vstring: ''
+  exppath: './auxiliary/scanner/http/jenkins_enum.rb'
+
+Apache Axis2:
+  path1: '/axis2/axis2-admin'
+  path2: ''
+  vstring: ''
+  exppath: 'blank'
+
+App_Name:
+  path1: '/cms400min/'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/windows/http/ektron_xslt_exec.rb'
+
+App_Name:
+  path1: '/imc'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/windows/http/hp_imc_mibfileupload.rb'
+
+App_Name:
+  path1: '/umbraco/'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/windows/http/umbraco_upload_aspx.rb'
+
+App_Name:
+  path1: '/vfolder.ghp'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/windows/http/efs_fmws_userid_bof.rb'
+
+App_Name:
+  path1: '/ctc/servlet'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/windows/http/sap_configservlet_exec_noauth.rb'
+
+HP SiteScope:
+  path1: '/SiteScope/'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/windows/http/hp_sitescope_runomagentcommand.rb'
+
+App_Name:
+  path1: '/ws/control'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/windows/http/oracle_endeca_exec.rb'
+
+App_Name:
+  path1: '/autopass'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/windows/http/hp_autopass_license_traversal.rb'
+
+App_Name:
+  path1: '/php/test.php'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/windows/http/php_apache_request_headers_bof.rb'
+
+App_Name:
+  path1: '/d4d/statusFilter.php'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/windows/http/sonicwall_scrutinizer_sqli.rb'
+
+App_Name:
+  path1: '/jos.php'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/multi/http/v0pcr3w_exec.rb'
+
+App_Name:
+  path1: '/moodle/'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/multi/http/moodle_cmd_exec.rb'
+
+App_Name:
+  path1: '/Auxiliumpetratepro/'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/multi/http/auxilium_upload_exec.rb'
+
+App_Name:
+  path1: '/IDC.php'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/multi/http/stunshell_eval.rb'
+
+App_Name:
+  path1: '/sflog/'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/multi/http/sflog_upload_exec.rb'
+
+App_Name:
+  path1: '/struts2-blank/example/HelloWorld.action'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/multi/http/struts_code_exec_classloader.rb'
+
+App_Name:
+  path1: '/mobilecartly/'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/multi/http/mobilecartly_upload_exec.rb'
+
+MediaWiki:
+  path1: '/mediawiki/index.php?title=Special:UserLogin&returnto=Main_Page'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/multi/http/mediawiki_thumb.rb'
+
+App_Name:
+  path1: '/qdPM/'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/multi/http/qdpm_upload_exec.rb'
+
+App_Name:
+  path1: '/www/'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/multi/http/webpagetest_upload_exec.rb'
+
+App_Name:
+  path1: '/gestioip/'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/multi/http/gestioip_exec.rb'
+
+App_Name:
+  path1: '/polarbearcms'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/multi/http/polarcms_upload_exec.rb'
+
+App_Name:
+  path1: '/SiteScope/'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/multi/http/hp_sitescope_uploadfileshandler.rb'
+
+App_Name:
+  path1: '/invoker/JMXInvokerServlet'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/multi/http/jboss_invoke_deploy.rb'
+
+App_Name:
+  path1: '/blank-struts2/login.action'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/multi/http/struts_code_exec_parameters.rb'
+
+App_Name:
+  path1: '/log1cms2.0/'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/multi/http/log1cms_ajax_create_folder.rb'
+
+App_Name:
+  path1: '/wikka/'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/multi/http/wikka_spam_exec.rb'
+
+App_Name:
+  path1: '/cuteflow_v.2.11.2/'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/multi/http/cuteflow_upload_exec.rb'
+
+App_Name:
+  path1: '/roller'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/multi/http/apache_roller_ognl_injection.rb'
+
+App_Name:
+  path1: '/jenkins/'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/multi/http/jenkins_script_console.rb'
+
+App_Name:
+  path1: '/SiteScope/'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/multi/http/hp_sitescope_issuesiebelcmd.rb'
+
+App_Name:
+  path1: '/phptax/'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/multi/http/phptax_exec.rb'
+
+App_Name:
+  path1: '/AjaXplorer-2.5.5/plugins/access.ssh/checkInstall.php'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/multi/http/ajaxplorer_checkinstall_exec.rb'
+
+App_Name:
+  path1: '/phpmyadmin/'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/multi/http/phpmyadmin_preg_replace.rb'
+
+App_Name:
+  path1: '/vtigercrm/'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/multi/http/vtiger_soap_upload.rb'
+
+App_Name:
+  path1: '/com_extplorer_2.1.0/'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/multi/http/extplorer_upload_exec.rb'
+
+App_Name:
+  path1: '/vtigercrm/'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/multi/http/vtiger_php_exec.rb'
+
+App_Name:
+  path1: '/openx/'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/multi/http/openx_backdoor_php.rb'
+
+App_Name:
+  path1: '/glossword/1.8/'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/multi/http/glossword_upload_exec.rb'
+
+App_Name:
+  path1: '/glpi/'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/multi/http/glpi_install_rce.rb'
+
+App_Name:
+  path1: '/kordil_edms/'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/multi/http/kordil_edms_upload_exec.rb'
+
+App_Name:
+  path1: '/mt'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/multi/http/movabletype_upgrade_exec.rb'
+
+Zabbix:
+  path1: '/zabbix/'
+  path2: '/zabbix'
+  vstring: ''
+  exppath: './exploits/multi/http/zabbix_script_exec.rb'
+
+App_Name:
+  path1: '/bf102/'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/multi/http/php_volunteer_upload_exec.rb'
+
+App_Name:
+  path1: '/struts2-blank/example/HelloWorld.action'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/multi/http/struts_default_action_mapper.rb'
+
+App_Name:
+  path1: '/appRain-q-0.1.5'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/multi/http/apprain_upload_exec.rb'
+
+App_Name:
+  path1: '/interface/'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/multi/http/mutiny_subnetmask_exec.rb'
+
+App_Name:
+  path1: '/tiki/'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/unix/webapp/tikiwiki_unserialize_exec.rb'
+
+App_Name:
+  path1: '/forums/'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/unix/webapp/invision_pboard_unserialize_exec.rb'
+
+App_Name:
+  path1: '/wordpress'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/unix/webapp/wp_property_upload_exec.rb'
+
+App_Name:
+  path1: '/zimbraAdmin'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/unix/webapp/zimbra_lfi.rb'
+
+App_Name:
+  path1: '/nagios3/cgi-bin/history.cgi'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/unix/webapp/nagios3_history_cgi.rb'
+
+App_Name:
+  path1: '/php-charts_v1.0/'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/unix/webapp/php_charts_exec.rb'
+
+App_Name:
+  path1: '/php-ofc-library/'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/unix/webapp/open_flash_chart_upload_exec.rb'
+
+App_Name:
+  path1: '/librettoCMS_v.2.2.2/'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/unix/webapp/libretto_upload_exec.rb'
+
+App_Name:
+  path1: '/horde/'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/unix/webapp/horde_unserialize_exec.rb'
+
+App_Name:
+  path1: '/wordpress'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/unix/webapp/wp_asset_manager_upload_exec.rb'
+
+App_Name:
+  path1: '/xoda/'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/unix/webapp/xoda_file_upload.rb'
+
+App_Name:
+  path1: '/zm/'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/unix/webapp/zoneminder_packagecontrol_exec.rb'
+
+App_Name:
+  path1: '/seportal'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/unix/webapp/seportal_sqli_exec.rb'
+
+App_Name:
+  path1: '/webtester5/'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/unix/webapp/webtester_exec.rb'
+
+App_Name:
+  path1: '/hastymail2/'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/unix/webapp/hastymail_exec.rb'
+
+App_Name:
+  path1: '/joomla'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/unix/webapp/joomla_media_upload_exec.rb'
+
+App_Name:
+  path1: '/kimai/'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/unix/webapp/kimai_sqli.rb'
+
+App_Name:
+  path1: '/chat/'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/unix/webapp/flashchat_upload_exec.rb'
+
+App_Name:
+  path1: '/simple_e_document_v_1_31/'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/unix/webapp/simple_e_document_upload_exec.rb'
+
+App_Name:
+  path1: '/sample'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/unix/webapp/egallery_upload_exec.rb'
+
+App_Name:
+  path1: '/openemr'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/unix/webapp/openemr_upload_exec.rb'
+
+App_Name:
+  path1: '/openemr'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/unix/webapp/openemr_sqli_privesc_upload.rb'
+
+App_Name:
+  path1: '/basilic-1.5.14/'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/unix/webapp/basilic_diff_exec.rb'
+
+App_Name:
+  path1: '/narcissus-master/'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/unix/webapp/narcissus_backend_exec.rb'
+
+App_Name:
+  path1: '/pp088/'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/unix/webapp/projectpier_upload_exec.rb'
+
+App_Name:
+  path1: '/opensis/'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/unix/webapp/opensis_modname_exec.rb'
+
+App_Name:
+  path1: '/vcms/'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/linux/http/vcms_upload.rb'
+
+App_Name:
+  path1: '/zabbix'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/linux/http/zabbix_sqli.rb'
+
+App_Name:
+  path1: '/WebCalendar-1.2.4/'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/linux/http/webcalendar_settings_exec.rb'
+
+App_Name:
+  path1: '/spywall/pbcontrol.php'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/linux/http/symantec_web_gateway_pbcontrol.rb'
+
+App_Name:
+  path1: '/WeBid'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/linux/http/webid_converter.rb'
+
+App_Name:
+  path1: '/dolibarr/'
+  path2: ''
+  vstring: ''
+  exppath: './exploits/linux/http/dolibarr_cmd_exec.rb'
+
+App_Name:
+  path1: '/ctc/servlet'
+  path2: ''
+  vstring: ''
+  exppath: './auxiliary/admin/sap/sap_configservlet_exec_noauth.rb'
+
+App_Name:
+  path1: '/users/password'
+  path2: ''
+  vstring: ''
+  exppath: './auxiliary/admin/http/rails_devise_pass_reset.rb'
+
+App_Name:
+  path1: '/apply.cgi'
+  path2: ''
+  vstring: ''
+  exppath: './auxiliary/admin/http/linksys_wrt54gl_exec.rb'
+
+App_Name:
+  path1: '/seam-booking/home.seam'
+  path2: ''
+  vstring: ''
+  exppath: './auxiliary/admin/http/jboss_seam_exec.rb'
+
+App_Name:
+  path1: '/cgi-bin/admin.cgi'
+  path2: ''
+  vstring: ''
+  exppath: './auxiliary/admin/http/scrutinizer_add_user.rb'
+
+App_Name:
+  path1: '/openbravo/'
+  path2: ''
+  vstring: ''
+  exppath: './auxiliary/admin/http/openbravo_xxe.rb'
+
+App_Name:
+  path1: '/BEMS'
+  path2: ''
+  vstring: ''
+  exppath: './auxiliary/admin/scada/advantech_webaccess_dbvisitor_sqli.rb'
+
+App_Name:
+  path1: '/CimWeb'
+  path2: ''
+  vstring: ''
+  exppath: './auxiliary/admin/scada/ge_proficy_substitute_traversal.rb'
+
+App_Name:
+  path1: '/PI/services/UCP/'
+  path2: ''
+  vstring: ''
+  exppath: './auxiliary/admin/cisco/cisco_secure_acs_bypass.rb'
+
+App_Name:
+  path1: '/_all_dbs'
+  path2: ''
+  vstring: ''
+  exppath: './auxiliary/scanner/couchdb/couchdb_enum.rb'
+
+App_Name:
+  path1: '/sap/bc/soap/rfc'
+  path2: ''
+  vstring: ''
+  exppath: './auxiliary/scanner/sap/sap_soap_rfc_brute_login.rb'
+
+App_Name:
+  path1: '/admin/index.jsp'
+  path2: ''
+  vstring: ''
+  exppath: './auxiliary/scanner/http/apache_activemq_source_disclosure.rb'
+
+App_Name:
+  path1: '/.svn/'
+  path2: ''
+  vstring: ''
+  exppath: './auxiliary/scanner/http/svn_wcdb_scanner.rb'
+
+App_Name:
+  path1: '/bitweaver/'
+  path2: ''
+  vstring: ''
+  exppath: './auxiliary/scanner/http/bitweaver_overlay_type_traversal.rb'
+
+App_Name:
+  path1: '/data/login'
+  path2: ''
+  vstring: ''
+  exppath: './auxiliary/scanner/http/dell_idrac.rb'
+
+App_Name:
+  path1: '/SiteScope/'
+  path2: ''
+  vstring: ''
+  exppath: './auxiliary/scanner/http/hp_sitescope_getfileinternal_fileaccess.rb'
+
+App_Name:
+  path1: '/status'
+  path2: ''
+  vstring: ''
+  exppath: './auxiliary/scanner/http/jboss_status.rb'
+
+App_Name:
+  path1: '/provision/index.php'
+  path2: ''
+  vstring: ''
+  exppath: './auxiliary/scanner/http/openmind_messageos_login.rb'
+
+App_Name:
+  path1: '/clansphere_2011.3/'
+  path2: ''
+  vstring: ''
+  exppath: './auxiliary/scanner/http/clansphere_traversal.rb'
+
+App_Name:
+  path1: '/imc'
+  path2: ''
+  vstring: ''
+  exppath: './auxiliary/scanner/http/hp_imc_reportimgservlt_traversal.rb'
+
+App_Name:
+  path1: '/VPortal/mgtconsole/CheckPassword.jsp'
+  path2: ''
+  vstring: ''
+  exppath: './auxiliary/scanner/http/infovista_enum.rb'
+
+App_Name:
+  path1: '/SiteScope/'
+  path2: ''
+  vstring: ''
+  exppath: './auxiliary/scanner/http/hp_sitescope_getsitescopeconfiguration.rb'
+
+App_Name:
+  path1: '/crowd/services'
+  path2: ''
+  vstring: ''
+  exppath: './auxiliary/scanner/http/atlassian_crowd_fileaccess.rb'
+
+App_Name:
+  path1: '/s40/'
+  path2: ''
+  vstring: ''
+  exppath: './auxiliary/scanner/http/s40_traversal.rb'
+
+App_Name:
+  path1: '/SiteScope/'
+  path2: ''
+  vstring: ''
+  exppath: './auxiliary/scanner/http/hp_sitescope_loadfilecontent_fileaccess.rb'
+
+App_Name:
+  path1: '/forum'
+  path2: ''
+  vstring: ''
+  exppath: './auxiliary/gather/mybb_db_fingerprint.rb'
+
+App_Name:
+  path1: '/userinfo/search'
+  path2: ''
+  vstring: ''
+  exppath: './auxiliary/gather/ibm_sametime_enumerate_users.rb'
+
+App_Name:
+  path1: '/dolibarr/'
+  path2: ''
+  vstring: ''
+  exppath: './auxiliary/gather/doliwamp_traversal_creds.rb'
+
+App_Name:
+  path1: '/portal'
+  path2: ''
+  vstring: ''
+  exppath: './auxiliary/gather/apache_rave_creds.rb'
+
+App_Name:
+  path1: '/drupal'
+  path2: ''
+  vstring: ''
+  exppath: './auxiliary/gather/drupal_openid_xxe.rb'
+
+Panasonic Network Camera WV-SF335:
+  path1: '/live/index.html?Language=0'
+  path2: '/admin/index.html?Language=0'
+  vstring: ''
+  exppath: ''
+
+AXIS Q7404 Video Encoder:
+  path1: '/view/viewer_index.shtml'
+  path2: '/operator/action_rules.shtml'
+  vstring: ''
+  exppath: ''
+
+Vivotek Mega-Pixel Network Camera:
+  path1: '/setup/system/system.html'
+  path2: '/media/media_settings.html'
+  vstring: ''
+  exppath: ''
+
+SVSi N-Command N8002:
+  path1: '/userAdmin.php'
+  path2: ''
+  vstring: ''
+  exppath: ''
+
+SVSi N-Series 2000 Decoder:
+  path1: '/localplay.php'
+  path2: '/edid.php'
+  vstring: ''
+  exppath: ''
