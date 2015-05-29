@@ -35,31 +35,31 @@ Apache Axis2:
   vstring: ''
   exppath: 'blank'
 
-App_Name:
+Ektron CMS:
   path1: '/cms400min/'
   path2: ''
   vstring: ''
   exppath: './exploits/windows/http/ektron_xslt_exec.rb'
 
-App_Name:
+HP Intelligent Management Center:
   path1: '/imc'
   path2: ''
   vstring: ''
   exppath: './exploits/windows/http/hp_imc_mibfileupload.rb'
 
-App_Name:
+Umbraco CMS:
   path1: '/umbraco/'
   path2: ''
   vstring: ''
   exppath: './exploits/windows/http/umbraco_upload_aspx.rb'
 
-App_Name:
+Easy File Management Web Server:
   path1: '/vfolder.ghp'
   path2: ''
   vstring: ''
   exppath: './exploits/windows/http/efs_fmws_userid_bof.rb'
 
-App_Name:
+SAP ConfigServlet:
   path1: '/ctc/servlet'
   path2: ''
   vstring: ''
@@ -77,67 +77,61 @@ Owl Intranet Engine:
   vstring: ''
   exppath: 'https://www.exploit-db.com/exploits/36456/'
 
-App_Name:
+Oracle Endeca Server:
   path1: '/ws/control'
   path2: ''
   vstring: ''
   exppath: './exploits/windows/http/oracle_endeca_exec.rb'
 
-App_Name:
+HP AutoPass License Server:
   path1: '/autopass'
   path2: ''
   vstring: ''
   exppath: './exploits/windows/http/hp_autopass_license_traversal.rb'
 
-App_Name:
-  path1: '/php/test.php'
-  path2: ''
-  vstring: ''
-  exppath: './exploits/windows/http/php_apache_request_headers_bof.rb'
-
-App_Name:
+Dell SonicWALL (Plixer) Scrutinizer:
   path1: '/d4d/statusFilter.php'
   path2: ''
   vstring: ''
   exppath: './exploits/windows/http/sonicwall_scrutinizer_sqli.rb'
 
-App_Name:
+v0pCr3w:
   path1: '/jos.php'
   path2: ''
   vstring: ''
   exppath: './exploits/multi/http/v0pcr3w_exec.rb'
 
-App_Name:
+Moodle:
   path1: '/moodle/'
   path2: ''
   vstring: ''
   exppath: './exploits/multi/http/moodle_cmd_exec.rb'
 
-App_Name:
+Auxilium RateMyPet:
   path1: '/Auxiliumpetratepro/'
   path2: ''
   vstring: ''
   exppath: './exploits/multi/http/auxilium_upload_exec.rb'
 
-App_Name:
+STUNSHELL:
   path1: '/IDC.php'
   path2: ''
   vstring: ''
   exppath: './exploits/multi/http/stunshell_eval.rb'
 
-App_Name:
+Sflog CMS:
   path1: '/sflog/'
   path2: ''
   vstring: ''
   exppath: './exploits/multi/http/sflog_upload_exec.rb'
 
-App_Name:
+Apache Struts:
   path1: '/struts2-blank/example/HelloWorld.action'
   path2: ''
   vstring: ''
   exppath: './exploits/multi/http/struts_code_exec_classloader.rb'
 
-App_Name:
+MobileCartly:
   path1: '/mobilecartly/'
   path2: ''
   vstring: ''
@@ -149,115 +143,115 @@ MediaWiki:
   vstring: ''
   exppath: './exploits/multi/http/mediawiki_thumb.rb'
 
-App_Name:
+qdPM:
   path1: '/qdPM/'
   path2: ''
   vstring: ''
   exppath: './exploits/multi/http/qdpm_upload_exec.rb'
 
-App_Name:
-  path1: '/www/'
-  path2: ''
+WebPageTest:
+  path1: '/gettext.php'
+  path2: '/work/resultimage.php'
   vstring: ''
   exppath: './exploits/multi/http/webpagetest_upload_exec.rb'
 
-App_Name:
+GestioIP:
   path1: '/gestioip/'
   path2: ''
   vstring: ''
   exppath: './exploits/multi/http/gestioip_exec.rb'
 
-App_Name:
+PolarBear CMS:
   path1: '/polarbearcms'
   path2: ''
   vstring: ''
   exppath: './exploits/multi/http/polarcms_upload_exec.rb'
 
-App_Name:
+HP SiteScope:
   path1: '/SiteScope/'
   path2: ''
   vstring: ''
   exppath: './exploits/multi/http/hp_sitescope_uploadfileshandler.rb'
 
-App_Name:
+JBoss:
   path1: '/invoker/JMXInvokerServlet'
   path2: ''
   vstring: ''
   exppath: './exploits/multi/http/jboss_invoke_deploy.rb'
 
-App_Name:
+Apache Struts:
   path1: '/blank-struts2/login.action'
   path2: ''
   vstring: ''
   exppath: './exploits/multi/http/struts_code_exec_parameters.rb'
 
-App_Name:
+Log1 CMS:
   path1: '/log1cms2.0/'
   path2: ''
   vstring: ''
   exppath: './exploits/multi/http/log1cms_ajax_create_folder.rb'
 
-App_Name:
+WikkaWiki:
   path1: '/wikka/'
   path2: ''
   vstring: ''
   exppath: './exploits/multi/http/wikka_spam_exec.rb'
 
-App_Name:
+CuteFlow:
   path1: '/cuteflow_v.2.11.2/'
   path2: ''
   vstring: ''
   exppath: './exploits/multi/http/cuteflow_upload_exec.rb'
 
-App_Name:
+Apache Roller:
   path1: '/roller'
   path2: ''
   vstring: ''
   exppath: './exploits/multi/http/apache_roller_ognl_injection.rb'
 
-App_Name:
+Jenkins Script-Console:
   path1: '/jenkins/'
   path2: ''
   vstring: ''
   exppath: './exploits/multi/http/jenkins_script_console.rb'
 
-App_Name:
+HP SiteScope:
   path1: '/SiteScope/'
   path2: ''
   vstring: ''
   exppath: './exploits/multi/http/hp_sitescope_issuesiebelcmd.rb'
 
-App_Name:
+PhpTax pfilez:
   path1: '/phptax/'
   path2: ''
   vstring: ''
   exppath: './exploits/multi/http/phptax_exec.rb'
 
-App_Name:
+AjaXplorer:
   path1: '/AjaXplorer-2.5.5/plugins/access.ssh/checkInstall.php'
   path2: ''
   vstring: ''
   exppath: './exploits/multi/http/ajaxplorer_checkinstall_exec.rb'
 
-App_Name:
+phpMyAdmin:
   path1: '/phpmyadmin/'
   path2: ''
   vstring: ''
   exppath: './exploits/multi/http/phpmyadmin_preg_replace.rb'
 
-App_Name:
+vTiger CRM:
   path1: '/vtigercrm/'
   path2: ''
   vstring: ''
   exppath: './exploits/multi/http/vtiger_soap_upload.rb'
 
-App_Name:
+eXtplorer:
   path1: '/com_extplorer_2.1.0/'
   path2: ''
   vstring: ''
   exppath: './exploits/multi/http/extplorer_upload_exec.rb'
 
-App_Name:
+vTiger CRM:
   path1: '/vtigercrm/'
   path2: ''
   vstring: ''
