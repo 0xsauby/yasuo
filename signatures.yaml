@@ -71,6 +71,12 @@ HP SiteScope:
   vstring: ''
   exppath: './exploits/windows/http/hp_sitescope_runomagentcommand.rb'
 
+Owl Intranet Engine:
+  path1: '/owl/admin/index.php?userid=1&newuser'
+  path2: '/owl/admin/index.php?userid=1&action=edituser&owluser=1'
+  vstring: ''
+  exppath: 'https://www.exploit-db.com/exploits/36456/'
+
 App_Name:
   path1: '/ws/control'
   path2: ''
