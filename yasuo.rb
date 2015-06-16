@@ -36,8 +36,14 @@ require 'logger'
 
 require File.dirname(File.realpath(__FILE__)) + '/formloginbrute.rb'
 
-
 VERSION = '2.0'
+
+class String
+  def red; colorize(self, "\e[1m\e[31m"); end
+  def green; colorize(self, "\e[1m\e[32m"); end
+  def bold; colorize(self, "\e[1m"); end
+  def colorize(text, color_code)  "#{color_code}#{text}\e[0m" end
+end
 
 class MultiDelegator
   def initialize(*targets)
@@ -288,7 +294,7 @@ private
         use_ssl = attack_url.include?  "https"
         resp = httpGETRequest(attack_url, :use_ssl => use_ssl)
 
-        if ((resp.code != "200" and resp.code != "401" and resp.code != "403") and (default_path_2 != '' and resp != nil))
+        if ((resp != nil) and (resp.code != "200" and resp.code != "401" and resp.code != "403") and (default_path_2 != ''))
           $logfile.info("<<<Primary path {#{attack_url}} was not found, looking for secondary path>>>")
           #puts "<<<Primary path {#{attack_url}} was not found, looking for secondary path>>>".red
           attack_url = url + default_path_2
