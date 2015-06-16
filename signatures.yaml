@@ -289,7 +289,7 @@ App_Name:
 
 Zabbix:
   path1: '/zabbix/'
-  path2: '/zabbix'
+  path2: '/zabbix/scripts.php'
   vstring: ''
   exppath: './exploits/multi/http/zabbix_script_exec.rb'
 
