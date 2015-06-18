@@ -1,4 +1,3 @@
-require "colorize"
 require "mechanize"
 require "net/http"
 require "net/https"

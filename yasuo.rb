@@ -18,8 +18,6 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-require "colorize"
 require "csv"
 require "net/http"
 require "net/http/persistent"
