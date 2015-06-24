@@ -718,3 +718,9 @@ SVSi N-Series 2000 Decoder:
   path2: '/edid.php'
   vstring: ''
   exppath: ''
+
+AlienVault USM:
+  path1: '/ossim/session/login.php'
+  path2: '/ossim/#configuration/administration/users'
+  vstring: ''
+  exppath: 'https://www.exploit-db.com/search/?action=search&text=alienvault&e_author='
