@@ -569,6 +569,11 @@ if __FILE__ == $0
     exit
   end
 
+  if not options.port_range.empty? and options.all_ports == true
+    puts "Please only supply one port scanning option either -A or -p".red
+    exit
+  end
+
   #$spray = false
   #if options.vomit == true
   #  $spray = true
