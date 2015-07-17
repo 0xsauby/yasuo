@@ -27,7 +27,7 @@ Hudson Jenkins:
   path1: '/jenkins/'
   path2: '/script'
   vstring: ''
-  exppath: './auxiliary/scanner/http/jenkins_enum.rb'
+  exppath: './auxiliary/scanner/http/jenkins_enum.rb, ./exploits/multi/http/jenkins_script_console.rb'
 
 Apache Axis2:
   path1: '/axis2/axis2-admin'
@@ -45,7 +45,7 @@ HP Intelligent Management Center:
   path1: '/imc'
   path2: ''
   vstring: ''
-  exppath: './exploits/windows/http/hp_imc_mibfileupload.rb'
+  exppath: './exploits/windows/http/hp_imc_mibfileupload.rb, ./auxiliary/scanner/http/hp_imc_reportimgservlt_traversal.rb'
 
 Umbraco CMS:
   path1: '/umbraco/'
@@ -63,13 +63,13 @@ SAP ConfigServlet:
   path1: '/ctc/servlet'
   path2: ''
   vstring: ''
-  exppath: './exploits/windows/http/sap_configservlet_exec_noauth.rb'
+  exppath: './exploits/windows/http/sap_configservlet_exec_noauth.rb, ./auxiliary/admin/sap/sap_configservlet_exec_noauth.rb'
 
 HP SiteScope:
   path1: '/SiteScope/'
   path2: ''
   vstring: ''
-  exppath: './exploits/windows/http/hp_sitescope_runomagentcommand.rb'
+  exppath: './exploits/windows/http/hp_sitescope_runomagentcommand.rb, ./exploits/multi/http/hp_sitescope_uploadfileshandler.rb, ./exploits/multi/http/hp_sitescope_issuesiebelcmd.rb, ./auxiliary/scanner/http/hp_sitescope_getfileinternal_fileaccess.rb, ./auxiliary/scanner/http/hp_sitescope_getsitescopeconfiguration.rb, ./auxiliary/scanner/http/hp_sitescope_loadfilecontent_fileaccess.rb'
 
 Owl Intranet Engine:
   path1: '/owl/admin/index.php?userid=1&newuser'
@@ -127,9 +127,15 @@ Sflog CMS:
 
 Apache Struts:
   path1: '/struts2-blank/example/HelloWorld.action'
+  path2: '/blank-struts2/login.action'
+  vstring: ''
+  exppath: './exploits/multi/http/struts_code_exec_classloader.rb, ./exploits/multi/http/struts_code_exec_parameters.rb, ./exploits/multi/http/struts_default_action_mapper.rb'
+
+Apache Struts:
+  path1: '/blank-struts2/login.action'
   path2: ''
   vstring: ''
-  exppath: './exploits/multi/http/struts_code_exec_classloader.rb'
+  exppath: './exploits/multi/http/struts_code_exec_parameters.rb'
 
 MobileCartly:
   path1: '/mobilecartly/'
@@ -167,23 +173,11 @@ PolarBear CMS:
   vstring: ''
   exppath: './exploits/multi/http/polarcms_upload_exec.rb'
 
-HP SiteScope:
-  path1: '/SiteScope/'
-  path2: ''
-  vstring: ''
-  exppath: './exploits/multi/http/hp_sitescope_uploadfileshandler.rb'
-
 JBoss:
   path1: '/invoker/JMXInvokerServlet'
   path2: ''
   vstring: ''
   exppath: './exploits/multi/http/jboss_invoke_deploy.rb'
-
-Apache Struts:
-  path1: '/blank-struts2/login.action'
-  path2: ''
-  vstring: ''
-  exppath: './exploits/multi/http/struts_code_exec_parameters.rb'
 
 Log1 CMS:
   path1: '/log1cms2.0/'
@@ -209,18 +203,6 @@ Apache Roller:
   vstring: ''
   exppath: './exploits/multi/http/apache_roller_ognl_injection.rb'
 
-Jenkins Script-Console:
-  path1: '/jenkins/'
-  path2: ''
-  vstring: ''
-  exppath: './exploits/multi/http/jenkins_script_console.rb'
-
-HP SiteScope:
-  path1: '/SiteScope/'
-  path2: ''
-  vstring: ''
-  exppath: './exploits/multi/http/hp_sitescope_issuesiebelcmd.rb'
-
 PhpTax pfilez:
   path1: '/phptax/'
   path2: ''
@@ -243,19 +225,13 @@ vTiger CRM:
   path1: '/vtigercrm/'
   path2: ''
   vstring: ''
-  exppath: './exploits/multi/http/vtiger_soap_upload.rb'
+  exppath: './exploits/multi/http/vtiger_soap_upload.rb, ./exploits/multi/http/vtiger_php_exec.rb'
 
 eXtplorer:
   path1: '/com_extplorer_2.1.0/'
   path2: ''
   vstring: ''
   exppath: './exploits/multi/http/extplorer_upload_exec.rb'
-
-vTiger CRM:
-  path1: '/vtigercrm/'
-  path2: ''
-  vstring: ''
-  exppath: './exploits/multi/http/vtiger_php_exec.rb'
 
 App_Name:
   path1: '/openx/'
@@ -300,13 +276,7 @@ App_Name:
   exppath: './exploits/multi/http/php_volunteer_upload_exec.rb'
 
 App_Name:
-  path1: '/struts2-blank/example/HelloWorld.action'
-  path2: ''
-  vstring: ''
-  exppath: './exploits/multi/http/struts_default_action_mapper.rb'
-
-App_Name:
-  path1: '/appRain-q-0.1.5'
+  path2: '/appRain-q-0.1.5'
   path2: ''
   vstring: ''
   exppath: './exploits/multi/http/apprain_upload_exec.rb'
@@ -333,7 +303,7 @@ App_Name:
   path1: '/wordpress'
   path2: ''
   vstring: ''
-  exppath: './exploits/unix/webapp/wp_property_upload_exec.rb'
+  exppath: './exploits/unix/webapp/wp_property_upload_exec.rb, ./exploits/unix/webapp/wp_asset_manager_upload_exec.rb'
 
 App_Name:
   path1: '/zimbraAdmin'
@@ -370,12 +340,6 @@ App_Name:
   path2: ''
   vstring: ''
   exppath: './exploits/unix/webapp/horde_unserialize_exec.rb'
-
-App_Name:
-  path1: '/wordpress'
-  path2: ''
-  vstring: ''
-  exppath: './exploits/unix/webapp/wp_asset_manager_upload_exec.rb'
 
 App_Name:
   path1: '/xoda/'
@@ -441,13 +405,7 @@ App_Name:
   path1: '/openemr'
   path2: ''
   vstring: ''
-  exppath: './exploits/unix/webapp/openemr_upload_exec.rb'
-
-App_Name:
-  path1: '/openemr'
-  path2: ''
-  vstring: ''
-  exppath: './exploits/unix/webapp/openemr_sqli_privesc_upload.rb'
+  exppath: './exploits/unix/webapp/openemr_upload_exec.rb, ./exploits/unix/webapp/openemr_sqli_privesc_upload.rb'
 
 App_Name:
   path1: '/basilic-1.5.14/'
@@ -507,13 +465,7 @@ App_Name:
   path1: '/dolibarr/'
   path2: ''
   vstring: ''
-  exppath: './exploits/linux/http/dolibarr_cmd_exec.rb'
-
-App_Name:
-  path1: '/ctc/servlet'
-  path2: ''
-  vstring: ''
-  exppath: './auxiliary/admin/sap/sap_configservlet_exec_noauth.rb'
+  exppath: './exploits/linux/http/dolibarr_cmd_exec.rb, ./auxiliary/gather/doliwamp_traversal_creds.rb'
 
 App_Name:
   path1: '/users/password'
@@ -600,12 +552,6 @@ App_Name:
   exppath: './auxiliary/scanner/http/dell_idrac.rb'
 
 App_Name:
-  path1: '/SiteScope/'
-  path2: ''
-  vstring: ''
-  exppath: './auxiliary/scanner/http/hp_sitescope_getfileinternal_fileaccess.rb'
-
-App_Name:
   path1: '/status'
   path2: ''
   vstring: ''
@@ -624,22 +570,10 @@ App_Name:
   exppath: './auxiliary/scanner/http/clansphere_traversal.rb'
 
 App_Name:
-  path1: '/imc'
-  path2: ''
-  vstring: ''
-  exppath: './auxiliary/scanner/http/hp_imc_reportimgservlt_traversal.rb'
-
-App_Name:
   path1: '/VPortal/mgtconsole/CheckPassword.jsp'
   path2: ''
   vstring: ''
   exppath: './auxiliary/scanner/http/infovista_enum.rb'
-
-App_Name:
-  path1: '/SiteScope/'
-  path2: ''
-  vstring: ''
-  exppath: './auxiliary/scanner/http/hp_sitescope_getsitescopeconfiguration.rb'
 
 App_Name:
   path1: '/crowd/services'
@@ -654,12 +588,6 @@ App_Name:
   exppath: './auxiliary/scanner/http/s40_traversal.rb'
 
 App_Name:
-  path1: '/SiteScope/'
-  path2: ''
-  vstring: ''
-  exppath: './auxiliary/scanner/http/hp_sitescope_loadfilecontent_fileaccess.rb'
-
-App_Name:
   path1: '/forum'
   path2: ''
   vstring: ''
@@ -670,12 +598,6 @@ App_Name:
   path2: ''
   vstring: ''
   exppath: './auxiliary/gather/ibm_sametime_enumerate_users.rb'
-
-App_Name:
-  path1: '/dolibarr/'
-  path2: ''
-  vstring: ''
-  exppath: './auxiliary/gather/doliwamp_traversal_creds.rb'
 
 App_Name:
   path1: '/portal'
