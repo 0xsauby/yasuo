@@ -256,8 +256,8 @@ private
           fake_uri_resp = httpGETRequest(fake_uri, :use_ssl => use_ssl)
           fake_dir_resp = httpGETRequest(fake_dir_uri, :use_ssl => use_ssl)
 
-          if (fake_uri_resp and fake_uri_resp.code != '200' and fake_uri_resp.code != '401' and
-              fake_dir_resp and fake_dir_resp.code != '200' and fake_dir_resp.code != '401')
+          if (fake_uri_resp and fake_uri_resp.code != '200' and fake_uri_resp.code != '401' and fake_uri_resp.code != '403' and 
+              fake_dir_resp and fake_dir_resp.code != '200' and fake_dir_resp.code != '401' and fake_dir_resp.code != '403')
             @target_urls.push(target_uri)
             break
           end
