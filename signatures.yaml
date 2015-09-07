@@ -615,34 +615,40 @@ Panasonic Network Camera WV-SF335:
   path1: '/live/index.html?Language=0'
   path2: '/admin/index.html?Language=0'
   vstring: ''
-  exppath: ''
+  exppath: 'Unauthenticate access to LIVE video feed'
 
 AXIS Q7404 Video Encoder:
   path1: '/view/viewer_index.shtml'
   path2: '/operator/action_rules.shtml'
   vstring: ''
-  exppath: ''
+  exppath: 'Unauthenticate access to LIVE video feed'
 
 Vivotek Mega-Pixel Network Camera:
   path1: '/setup/system/system.html'
   path2: '/media/media_settings.html'
   vstring: ''
-  exppath: ''
+  exppath: 'Unauthenticate access to LIVE video feed'
 
 SVSi N-Command N8002:
   path1: '/userAdmin.php'
   path2: ''
   vstring: ''
-  exppath: ''
+  exppath: 'Unauthenticate access to LIVE video feed'
 
 SVSi N-Series 2000 Decoder:
   path1: '/localplay.php'
   path2: '/edid.php'
   vstring: ''
-  exppath: ''
+  exppath: 'Unauthenticate access to LIVE video feed'
 
 AlienVault USM:
   path1: '/ossim/session/login.php'
   path2: '/ossim/#configuration/administration/users'
   vstring: ''
   exppath: 'https://www.exploit-db.com/search/?action=search&text=alienvault&e_author='
+
+Arecont Vision Mega Pixel Panoramic Camera:
+  path1: '/livevideo.html'
+  path2: ''
+  vstring: 'dinapage'
+  exppath: 'Unauthenticate access to LIVE video feed'
