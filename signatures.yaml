@@ -611,6 +611,12 @@ App_Name:
   vstring: ''
   exppath: './auxiliary/gather/drupal_openid_xxe.rb'
 
+Symantec Endpoint Protection Manager:
+  path1: '/servlet/ConsoleServlet'
+  path2: ''
+  vstring: ''
+  exppath: '/exploits/windows/http/sepm_auth_bypass_rce'
+
 Panasonic Network Camera WV-SF335:
   path1: '/live/index.html?Language=0'
   path2: '/admin/index.html?Language=0'
