@@ -59,6 +59,12 @@ Easy File Management Web Server:
   vstring: ''
   exppath: './exploits/windows/http/efs_fmws_userid_bof.rb'
 
+VMware ESXi:
+  path1: '/folder?dcPath=ha-datacenter'
+  path2: '/mob'
+  vstring: ''
+  exppath: ''
+
 SAP ConfigServlet:
   path1: '/ctc/servlet'
   path2: ''
