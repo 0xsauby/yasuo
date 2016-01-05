@@ -226,7 +226,7 @@ private
 
       host.each_port do |port|
         open_port = "#{port.state}" == "open"
-        web_service = ("#{port.service}".include?("http") or port.service == "websm" or port.service.ssl?)
+        web_service = ("#{port.service}".include?("http") or "#{port.service}".include?("ssl") or port.service == "websm" or port.service.ssl?)
         wrapped_service = "#{port.service}".include?("tcpwrapped")
 
         next unless open_port and (web_service or wrapped_service)
@@ -237,7 +237,7 @@ private
           schemes = ["https", "http"]
         else
           status = "open"
-          if port.service.ssl?
+          if port.service.ssl? or "#{port.service}".include?("https") or "#{port.service}".include?("ssl")
             schemes = ["https"]
           else
             schemes = ["http"]
