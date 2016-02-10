@@ -34,6 +34,8 @@ Yasuo provides following command-line options:
 
 -f :: If you do not want Yasuo to perform port scan and already have an nmap output in xml format, use this switch to feed the nmap output
 
+-u :: Takes a newline-separated file of URLs saved from previous run of Yasuo. See below for more details.
+
 -n :: Tells Yasuo to not ping the host while performing the port scan. Standard nmap option.
 
 -p :: Use this switch to provide port number(s)/range
