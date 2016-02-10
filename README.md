@@ -56,7 +56,7 @@ If for some reason, you have to re-run Yasuo against the same set of targets, th
 
 This latest version of Yasuo will automatically save a file, savedURLstateXXXXX.out, in the same folder it runs from. This file will contain all the "good urls". If you plan to re-run Yasuo on the same targets, just feed this file to Yasuo without the -f or -r options.
 
-Example: ruby yasuo.rb -s my_custom_signatures.yaml -u savedURLstateXXXXX.out
+`Example: ruby yasuo.rb -s my_custom_signatures.yaml -u savedURLstateXXXXX.out`
 
 Yasuo will parse this file and start enumerating vulnerable applications against the listed "good urls". Ta-Da.
 
