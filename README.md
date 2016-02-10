@@ -48,6 +48,18 @@ Yasuo provides following command-line options:
 
 -h :: Well, take a guess
 
+##What is this new switch: --usesavedstate (-u)
+
+When Yasuo runs, it performs several steps before starting to enumerate vulnerable applications. If you provide an IP address or range, it will perform a port scan against the provided targets. If you provide Yasuo with nmap xml output file, it will parse that file and enumerate hosts with open web ports. It then sends a request for a fake (non-existant) file and directory to each enumerated host:ip. To reduce false-positives, it discards all ip:port that respond back with HTTP 200 Ok for the fake file & directory requests. At the end of this whole process, we get a list of, let's say, "good urls". These good urls are then used to enumerate vulnerable applications.
+
+If for some reason, you have to re-run Yasuo against the same set of targets, the previous versions of Yasuo will go through this whole process again. That's not efficient at all. I know, I am mostly dumb and a slow learner but I am constantly evolving. Anyways, a good reason to re-run Yasuo against the same targets could be to use a different (or custom) signatures file.
+
+This latest version of Yasuo will automatically save a file, savedURLstateXXXXX.out, in the same folder it runs from. This file will contain all the "good urls". If you plan to re-run Yasuo on the same targets, just feed this file to Yasuo without the -f or -r options.
+
+Example: ruby yasuo.rb -s my_custom_signatures.yaml -u savedURLstateXXXXX.out
+
+Yasuo will parse this file and start enumerating vulnerable applications against the listed "good urls". Ta-Da.
+
 ##Examples
 
 `./yasuo -r 127.0.0.1 -p 80,8080,443,8443 -b form`
