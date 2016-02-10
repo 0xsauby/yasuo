@@ -34,7 +34,7 @@ require 'logger'
 
 require File.dirname(File.realpath(__FILE__)) + '/formloginbrute.rb'
 
-VERSION = '2.0'
+VERSION = '2.1'
 
 class String
   def red; colorize(self, "\e[1m\e[31m"); end
