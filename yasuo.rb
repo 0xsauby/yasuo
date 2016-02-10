@@ -63,7 +63,7 @@ class MultiDelegator
 end
 
 class Scanner
-  def initialize(paths_filename, nmap_filename, target_ips_range, scan_port_range, scan_all_ports, brute_force_mode, number_of_threads)
+  def initialize(paths_filename, nmap_filename, savedURLs_filename, target_ips_range, scan_port_range, scan_all_ports, brute_force_mode, number_of_threads)
     #Logger
     yasuolog = 'yasuo_output_' + Time.now.gmtime.to_s.gsub(/\W/,'') + '.log'
     $log_file = File.open(yasuolog, "a")
@@ -76,6 +76,9 @@ class Scanner
 
     # nmap XML file
     @nmap_filename = nmap_filename
+
+    # File with exploitable URLs saved from last Yasuo run
+    @savedURLs_filename = savedURLs_filename
 
     # the range of IPs to scan
     @target_ips_range = target_ips_range
@@ -103,13 +106,18 @@ class Scanner
 
   def run
     # logic to determine if scan is performed
-    if @nmap_filename.empty?
+    if @nmap_filename.empty? and @savedURLs_filename.nil?
       $logboth.info("Initiating port scan")
       nmap_scan
     end
 
-    # look through nmap scan output to find vulnerable applications
-    process_nmap_scan
+    if @savedURLs_filename.nil?
+      # look through nmap scan output to find vulnerable applications
+      process_nmap_scan
+    else
+      #Uses the saved good URLs in file from the initial Yasuo run rather than repeating the whole process
+      process_savedgoodURLs_file
+    end
   end
 
 private
@@ -149,8 +157,50 @@ private
     $stdout.reopen(orig_std_out)
   end
 
+  def process_savedgoodURLs_file
+
+    $logboth.info("<<<Reading all saved URLs from the provided file>>>")
+    @target_urls = []
+    File.read(@savedURLs_filename).each_line do |goodurl|
+      @target_urls << goodurl.chop
+    end
+    p @target_urls
+
+    slice_size = (@target_urls.size/Float(@thread_count)).ceil
+    thread_list = @target_urls.each_slice(slice_size).to_a
+
+    threads = []
+    @thread_count.times do |i|
+      if thread_list[i] != nil
+        threads << Thread.new do
+          if i == 0
+            $logboth.info("<<<Enumerating vulnerable applications>>>")
+          end
+          find_vulnerable_applications(thread_list[i])
+        end
+      end
+    end
+
+    threads.each do |scan_thread| 
+      scan_thread.join
+    end
+
+    $logfile.info("--------------------------------------------------------")
+    $logfile.info("<<<Yasuo discovered following vulnerable applications>>>")
+    $logfile.info("--------------------------------------------------------")
+    $logfile.info("#{@info}")
+
+    puts ""
+    puts ""
+    puts "--------------------------------------------------------"
+    puts "<<<Yasuo discovered following vulnerable applications>>>".green
+    puts "--------------------------------------------------------"
+    puts @info.to_table(:first_row_is_head => true)
+  end
+
   def process_nmap_scan
 
+    urlstatefile = 'savedURLstate' + Time.now.gmtime.to_s.gsub(/\W/,'') + '.out'
     $logboth.info("Using nmap scan output file #{@nmap_filename}")
     @target_urls = []
     @open_ports = 0
@@ -179,6 +229,9 @@ private
     end
 
     if !@target_urls.empty?
+      File.open(urlstatefile, "w+") do |goodurls|
+        goodurls.puts(@target_urls)
+      end
       slice_size = (@target_urls.size/Float(@thread_count)).ceil
       thread_list = @target_urls.each_slice(slice_size).to_a
     else
@@ -490,6 +543,10 @@ if __FILE__ == $0
       options.nmap_file = file
     end
 
+    opts.on("-u", "--usesavedstate [FILE]", "Use saved good URLs from file") do |file|
+      options.goodurls_file = file
+    end
+
     opts.on("-r", "--range [RANGE]", "IP Range to Scan") do |iprange|
       options.ip_range = iprange
       if ("#{options.ip_range}".include? "file")
@@ -548,7 +605,7 @@ if __FILE__ == $0
 
   end.parse!(ARGV)
 
-  unless options.nmap_file.length > 1 || options.ip_range.length > 1
+  unless options.nmap_file.length > 1 || options.ip_range.length > 1 || options.goodurls_file
     puts "To perform the Nmap scan, use the option -r to provide the network range.\n"
     puts "Additionally, also provide the port number(s) or choose either option -pA \n"
     puts "to scan all ports or option -pD to scan top 1000 ports.\n\n"
@@ -586,6 +643,7 @@ if __FILE__ == $0
   Scanner.new(
     options.paths_file,
     options.nmap_file,
+    options.goodurls_file,
     options.ip_range,
     options.port_range,
     options.all_ports,
