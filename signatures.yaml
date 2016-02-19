@@ -243,7 +243,7 @@ Splunk:
   path1: '/en-US/app/launcher/home'
   path2: '/en-US/manager/search/apps/local'
   vstring: ''
-  exppath: './exploit/multi/http/splunk_upload_app_exec', 'http://blog.7elements.co.uk/2012/11/splunk-with-great-power-comes-great-responsibility.html'
+  exppath: './exploit/multi/http/splunk_upload_app_exec, http://blog.7elements.co.uk/2012/11/splunk-with-great-power-comes-great-responsibility.html'
 
 App_Name:
   path1: '/openx/'
