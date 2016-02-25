@@ -245,6 +245,12 @@ Splunk:
   vstring: ''
   exppath: './exploit/multi/http/splunk_upload_app_exec, http://blog.7elements.co.uk/2012/11/splunk-with-great-power-comes-great-responsibility.html'
 
+FreePBX:
+  path1: '/admin/admin/config.php?type=setup&display=general'
+  path2: '/admin/admin/reports.php'
+  vstring: ''
+  exppath: 'https://www.exploit-db.com/search/?action=search&description=freepbx&secimg=3Rel&e_author='
+
 App_Name:
   path1: '/openx/'
   path2: ''
