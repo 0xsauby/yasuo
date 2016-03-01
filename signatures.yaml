@@ -255,7 +255,7 @@ ManageEngine ServiceDesk Plus:
   path1: '/WOListView.do'
   path2: '/admin/admin/reports.php'
   vstring: '/SetUpWizard.do?forwardTo=site'
-  exppath: 'https://www.exploit-db.com/search/?action=search&description=freepbx&secimg=3Rel&e_author='
+  exppath: './exploit/multi/http/manageengine_auth_upload'
 
 App_Name:
   path1: '/openx/'
