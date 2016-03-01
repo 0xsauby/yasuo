@@ -371,8 +371,8 @@ private
             target_urls.delete_at(myindex)
 
             if not resp.body.scan(/<form/i).empty? and not resp.body.scan(/login/i).empty?
-              $logfile.info("Yasuo found #{appkey} at #{attack_url}. May require form based auth")
-              puts "Yasuo found #{appkey} at #{attack_url}. May require form based auth".green
+              $logfile.info("[+] Yasuo found #{appkey} at #{attack_url}. May require form based auth")
+              puts "[+] Yasuo found #{appkey} at #{attack_url}. May require form based auth".green
               if @brute_force_mode == 'form' or @brute_force_mode == 'all'
                 $logboth.info("Double-checking if the application implements a login page and initiating login bruteforce, hold on tight...")
                 creds = LoginFormBruteForcer::brute_by_force(attack_url)
@@ -380,8 +380,8 @@ private
                 creds = ["N/A", "N/A"]
               end
             else
-              $logfile.info("Yasuo found an unauthenticated instance of #{appkey} at #{attack_url}.")
-              puts "Yasuo found an unauthenticated instance of #{appkey} at #{attack_url}.".green
+              $logfile.info("[+] Yasuo found an unauthenticated instance of #{appkey} at #{attack_url}.")
+              puts "[+] Yasuo found an unauthenticated instance of #{appkey} at #{attack_url}.".green
               creds = ["None", "None"]
             end
 
@@ -403,7 +403,7 @@ private
             target_urls.delete_at(myindex)
             
             if not resp.body.scan(/<form/i).empty? and not resp.body.scan(/login/i).empty?
-              puts "Yasuo found #{appkey} at #{attack_url}. Says not authorized but may contain login page".green
+              puts "[+] Yasuo found #{appkey} at #{attack_url}. Says not authorized but may contain login page".green
               if @brute_force_mode == 'form' or @brute_force_mode == 'all'
                 $logboth.info("Double-checking if the application implements a login page and initiating login bruteforce attack, hold on tight...")
                 creds = LoginFormBruteForcer::brute_by_force(attack_url)
@@ -425,8 +425,8 @@ private
           when "401"
             target_urls.delete_at(myindex)
 
-            $logfile.info("Yasuo found #{appkey} at #{attack_url}. Requires HTTP basic auth")
-            puts "Yasuo found #{appkey} at #{attack_url}. Requires HTTP basic auth".green
+            $logfile.info("[+] Yasuo found #{appkey} at #{attack_url}. Requires HTTP basic auth")
+            puts "[+] Yasuo found #{appkey} at #{attack_url}. Requires HTTP basic auth".green
             if @brute_force_mode == 'basic' or @brute_force_mode == 'all'
               $logboth.info("Initiating login bruteforce, hold on tight...")
               creds = brute_force_basic_auth(attack_url)
@@ -464,8 +464,8 @@ private
       sleep 0.5
 
       if response and (response.code == "200" or response.code == "301")
-        $logfile.info("Yatta, found default login credentials for #{url401} - #{username} / #{password}\n")
-        puts ("Yatta, found default login credentials for #{url401} - #{username} / #{password}\n").green
+        $logfile.info("[+] Yatta, found default login credentials for #{url401} - #{username} / #{password}\n")
+        puts ("[+] Yatta, found default login credentials for #{url401} - #{username} / #{password}\n").green
         return username, password
       end
     end

@@ -60,8 +60,8 @@ module LoginFormBruteForcer
         if (login_request.body.scan(/"#{login_form.name}"/i).empty? and
             login_request.body.scan(/"#{username_field.name}"/i).empty? and
             login_request.body.scan(/"#{username_field.name}"/i).empty?)
-          puts "Yatta, found default login credentials for #{url} - #{username} / #{password}\n".green
-          $logfile.info("Yatta, found default login credentials for #{url} - #{username} / #{password}")
+          puts "[+] Yatta, found default login credentials for #{url} - #{username} / #{password}\n".green
+          $logfile.info("[+] Yatta, found default login credentials for #{url} - #{username} / #{password}")
           return username, password
         end
       rescue Mechanize::ResponseCodeError => exception
