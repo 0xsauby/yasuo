@@ -228,8 +228,8 @@ phpMyAdmin:
   exppath: './exploits/multi/http/phpmyadmin_preg_replace.rb'
 
 vTiger CRM:
-  path1: '/vtigercrm/'
-  path2: ''
+  path1: '/vtigercrm/index.php?action=index&module=Home'
+  path2: '/vtigercrm/index.php?module=Settings&action=ModuleManager&parenttab=Settings'
   vstring: ''
   exppath: './exploits/multi/http/vtiger_soap_upload.rb, ./exploits/multi/http/vtiger_php_exec.rb'
 
@@ -249,6 +249,12 @@ FreePBX:
   path1: '/admin/admin/config.php?type=setup&display=general'
   path2: '/admin/admin/reports.php'
   vstring: ''
+  exppath: 'https://www.exploit-db.com/search/?action=search&description=freepbx&secimg=3Rel&e_author='
+
+ManageEngine ServiceDesk Plus:
+  path1: '/WOListView.do'
+  path2: '/admin/admin/reports.php'
+  vstring: '/SetUpWizard.do?forwardTo=site'
   exppath: 'https://www.exploit-db.com/search/?action=search&description=freepbx&secimg=3Rel&e_author='
 
 App_Name:
