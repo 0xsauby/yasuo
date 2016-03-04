@@ -45,6 +45,14 @@ module LoginFormBruteForcer
     usernames_and_passwords.each do |user, pass|
       username = user.chomp
       password = pass.chomp
+
+      if not username_field
+        $logboth.warn ("[+] Could not enumerate the username field, moving on. You should check it manually")
+        username = "<Check Manually>"
+        password = "<Check Manually>"
+        return username, password
+      end
+
       username_field.value = username
       password_field.value = password
 
