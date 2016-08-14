@@ -257,6 +257,12 @@ ManageEngine ServiceDesk Plus:
   vstring: '/SetUpWizard.do?forwardTo=site'
   exppath: './exploit/multi/http/manageengine_auth_upload'
 
+WhatsUp Gold IPSwitch:
+  path1: '/NmConsole/CoreNm/User/DlgUserLogin/DlgUserLogin.asp'
+  path2: '/NmConsole/Workspace/HomeWorkspace/HomeWorkspace.asp'
+  vstring: 'Ipswitch WhatsUp Gold premium Edition'
+  exppath: 'https://www.exploit-db.com/exploits/20035/'
+
 App_Name:
   path1: '/openx/'
   path2: ''
