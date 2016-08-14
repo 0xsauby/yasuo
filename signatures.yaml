@@ -249,7 +249,7 @@ FreePBX:
   path1: '/admin/admin/config.php?type=setup&display=general'
   path2: '/admin/admin/reports.php'
   vstring: ''
-  exppath: 'https://www.exploit-db.com/search/?action=search&description=freepbx&secimg=3Rel&e_author='
+  exppath: 'https://www.exploit-db.com/search/?description=freepbx'
 
 ManageEngine ServiceDesk Plus:
   path1: '/WOListView.do'
@@ -681,7 +681,7 @@ AlienVault USM:
   path1: '/ossim/session/login.php'
   path2: '/ossim/#configuration/administration/users'
   vstring: ''
-  exppath: 'https://www.exploit-db.com/search/?action=search&text=alienvault&e_author='
+  exppath: 'https://www.exploit-db.com/search/?text=alienvault'
 
 Arecont Vision Mega Pixel Panoramic Camera:
   path1: '/livevideo.html'
