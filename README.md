@@ -1,5 +1,9 @@
 #YASUO [@0xsauby]
 
+[![AUR](https://img.shields.io/aur/license/yaourt.svg?maxAge=2592000)](http://www.fsf.org/licensing/)
+[![ToolsWatch 2016 Arsenal](https://www.toolswatch.org/badges/arsenal/2016.svg)](https://www.blackhat.com/eu-16/arsenal.html)
+[![Twitter URL](https://img.shields.io/twitter/url/http/shields.io.svg?style=social&maxAge=2592000)](https://twitter.com/0xsauby)
+
 ##Description
 
 Yasuo is a ruby script that scans for vulnerable 3rd-party web applications.
