@@ -34,7 +34,7 @@ require 'logger'
 
 require File.dirname(File.realpath(__FILE__)) + '/formloginbrute.rb'
 
-VERSION = '2.1'
+VERSION = '2.2'
 
 class String
   def red; colorize(self, "\e[1m\e[31m"); end
@@ -63,7 +63,7 @@ class MultiDelegator
 end
 
 class Scanner
-  def initialize(paths_filename, nmap_filename, savedURLs_filename, target_ips_range, scan_port_range, scan_all_ports, brute_force_mode, number_of_threads)
+  def initialize(paths_filename, nmap_filename, target_file, savedURLs_filename, target_ips_range, scan_port_range, scan_all_ports, brute_force_mode, number_of_threads)
     #Logger
     yasuolog = 'yasuo_output_' + Time.now.gmtime.to_s.gsub(/\W/,'') + '.log'
     $log_file = File.open(yasuolog, "a")
@@ -76,6 +76,9 @@ class Scanner
 
     # nmap XML file
     @nmap_filename = nmap_filename
+    
+    # input file for hosts
+    @target_file = target_file
 
     # File with exploitable URLs saved from last Yasuo run
     @savedURLs_filename = savedURLs_filename
@@ -137,7 +140,11 @@ private
       nmap.os_fingerprint = false
       nmap.verbose = false
 
-      nmap.targets = @target_ips_range
+      if @target_file.length > 1
+        nmap.target_file = @target_file
+      else
+        nmap.targets = @target_ips_range
+      end
 
       # Logic for determining which ports are to be scanned by the script.
       # TODO: what happens if neither flag is provided? Should we default to
@@ -510,7 +517,7 @@ end
 
 if __FILE__ == $0
   puts "#########################################################################################"
-  puts "oooooo   oooo       .o.        .oooooo..o ooooo     ooo   .oooooo.
+  puts "  oooooo   oooo       .o.        .oooooo..o ooooo     ooo   .oooooo.
    `888.   .8'       .888.      d8P'    `Y8 `888'     `8'  d8P'  `Y8b
     `888. .8'       .88888.     Y88bo.       888       8  888      888
      `888.8'       .8' `888.     `ZY8888o.   888       8  888      888
@@ -530,6 +537,7 @@ if __FILE__ == $0
   options.brute = ''
   options.thread_count = 1
   options.paths_file = ''
+  options.target_file = ''
   #options.vomit = false
 
   OptionParser.new do |opts|
@@ -541,6 +549,10 @@ if __FILE__ == $0
 
     opts.on("-f", "--file [FILE]", "Nmap output in xml format") do |file|
       options.nmap_file = file
+    end
+    
+    opts.on("-l", "--inputlist [FILE]", "New line delimited file of IP addresses you wish to scan") do |file|
+      options.target_file = file
     end
 
     opts.on("-u", "--usesavedstate [FILE]", "Use saved good URLs from file") do |file|
@@ -605,8 +617,9 @@ if __FILE__ == $0
 
   end.parse!(ARGV)
 
-  unless options.nmap_file.length > 1 || options.ip_range.length > 1 || options.goodurls_file
-    puts "To perform the Nmap scan, use the option -r to provide the network range.\n"
+  unless options.nmap_file.length > 1 || options.target_file.length > 1  || options.ip_range.length > 1 || options.goodurls_file
+    puts "To perform the Nmap scan, use the option -r to provide the network range or\n"
+    puts "use the option -l to provide the list of IP hosts like nmap -iL.\n"
     puts "Additionally, also provide the port number(s) or choose either option -pA \n"
     puts "to scan all ports or option -pD to scan top 1000 ports.\n\n"
     puts "If you already have an Nmap scan output file in XML format, use -f\n"
@@ -643,6 +656,7 @@ if __FILE__ == $0
   Scanner.new(
     options.paths_file,
     options.nmap_file,
+    options.target_file,
     options.goodurls_file,
     options.ip_range,
     options.port_range,
