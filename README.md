@@ -32,7 +32,9 @@ You would need to install the following gems:
 
 Yasuo provides following command-line options:
 
--r :: If you want Yasuo to perform port scan, use this switch to provide an IP address or IP range or an input file with new-line separated IP addresses
+-r :: If you want Yasuo to perform port scan, use this switch to provide an IP address or IP range
+
+-l :: If you want Yasuo to perform port scan, use this switch to provide an input file with new-line separated IP addresses, similar to nmap's -iL option
 
 -s :: Provide custom signature file. [./yasuo.rb -s mysignatures.yaml -f nmap.xml] [Default - signatures.yaml]
 
@@ -71,6 +73,13 @@ Yasuo will parse this file and start enumerating vulnerable applications against
 The above command will perform port scan against 127.0.0.1 on ports 80, 8080,
 443 and 8443 and will brute-force login for all the applications that implement
 form-based authentication.
+
+
+`./yasuo -l /project/hosts -p 80,8080,443,8443`
+
+The above command will perform port scan against the hosts in file /projetcs/hosts 
+on ports 80, 8080, 443 and 8443 and will not perform any brute-force actions against
+the applications dicovered.
 
 
 `./yasuo -f my_nmap_output.xml -b all`
