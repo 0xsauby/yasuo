@@ -1,0 +1,10 @@
+Changelog:
+
+version 2.3
+-----------
+
+1) Accepts file with new-line separated list of IP addresses with "-l" switch.
+2) Smart brute-forcing. Introduced app-specific credentials in the signature file, which are tried first.
+3) Sqlite database integration. Yasuo output is now stored in a sqlite database.
+4) All output and log files are now saved in "logs" directory.
+5) And man there were bugs. Fixed now.

@@ -2,7 +2,9 @@ manager
 role1
 admin
 pass
+jenkins
 zabbix
+Password123
 root
 tomcat
 s3cret

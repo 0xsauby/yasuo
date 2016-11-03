@@ -4,687 +4,802 @@
 #  - 'unique_app_path_2'
 #  - 'version string'
 #  - 'exploit_path'
+#  - 'creds' --> for smart brute-forcing
 
 JBoss jmx-console:
   path1: '/jmx-console'
   path2: '/jmx-console/'
   vstring: ''
   exppath: './exploit/multi/http/jboss_deploymentfilerepository'
+  defcreds: 'admin:admin'
 
 Apache Tomcat:
   path1: '/manager/html'
   path2: '/manager'
   vstring: ''
   exppath: './exploits/multi/http/tomcat_mgr_upload.rb'
+  defcreds: 'tomcat:tomcat'
 
 Testlink:
   path1: '/testlink-1.9.3/login.php'
   path2: '/testlink/login.php'
   vstring: ''
   exppath: './exploits/multi/http/testlink_upload_exec.rb'
+  defcreds: 'admin:admin'
 
 Hudson Jenkins:
-  path1: '/jenkins/'
-  path2: '/script'
+  path1: '/jenkins/login?from=/jenkins/'
+  path2: '/jenkins/'
   vstring: ''
   exppath: './auxiliary/scanner/http/jenkins_enum.rb, ./exploits/multi/http/jenkins_script_console.rb'
+  defcreds: 'admin:admin'
 
 Apache Axis2:
   path1: '/axis2/axis2-admin'
   path2: ''
   vstring: ''
   exppath: 'blank'
+  defcreds: 'admin:axis2'
 
 Ektron CMS:
   path1: '/cms400min/'
   path2: ''
   vstring: ''
   exppath: './exploits/windows/http/ektron_xslt_exec.rb'
+  defcreds: 'admin:admin'
 
 HP Intelligent Management Center:
   path1: '/imc'
   path2: ''
   vstring: ''
   exppath: './exploits/windows/http/hp_imc_mibfileupload.rb, ./auxiliary/scanner/http/hp_imc_reportimgservlt_traversal.rb'
+  defcreds: 'admin:admin'
 
 Umbraco CMS:
   path1: '/umbraco/'
   path2: ''
   vstring: ''
   exppath: './exploits/windows/http/umbraco_upload_aspx.rb'
+  defcreds: 'admin:admin'
 
 Easy File Management Web Server:
   path1: '/vfolder.ghp'
   path2: ''
   vstring: ''
   exppath: './exploits/windows/http/efs_fmws_userid_bof.rb'
+  defcreds: 'admin:admin'
 
 VMware ESXi:
   path1: '/folder?dcPath=ha-datacenter'
   path2: '/mob'
   vstring: ''
   exppath: ''
+  defcreds: 'admin:admin'
 
 SAP ConfigServlet:
   path1: '/ctc/servlet'
   path2: ''
   vstring: ''
   exppath: './exploits/windows/http/sap_configservlet_exec_noauth.rb, ./auxiliary/admin/sap/sap_configservlet_exec_noauth.rb'
+  defcreds: 'admin:admin'
 
 HP SiteScope:
   path1: '/SiteScope/'
   path2: ''
   vstring: ''
   exppath: './exploits/windows/http/hp_sitescope_runomagentcommand.rb, ./exploits/multi/http/hp_sitescope_uploadfileshandler.rb, ./exploits/multi/http/hp_sitescope_issuesiebelcmd.rb, ./auxiliary/scanner/http/hp_sitescope_getfileinternal_fileaccess.rb, ./auxiliary/scanner/http/hp_sitescope_getsitescopeconfiguration.rb, ./auxiliary/scanner/http/hp_sitescope_loadfilecontent_fileaccess.rb'
+  defcreds: 'admin:admin'
 
 Owl Intranet Engine:
   path1: '/owl/admin/index.php?userid=1&newuser'
   path2: '/owl/admin/index.php?userid=1&action=edituser&owluser=1'
   vstring: ''
   exppath: 'https://www.exploit-db.com/exploits/36456/'
+  defcreds: 'admin:admin'
 
 Oracle Endeca Server:
   path1: '/ws/control'
   path2: ''
   vstring: ''
   exppath: './exploits/windows/http/oracle_endeca_exec.rb'
+  defcreds: 'admin:admin'
 
 HP AutoPass License Server:
   path1: '/autopass'
   path2: ''
   vstring: ''
   exppath: './exploits/windows/http/hp_autopass_license_traversal.rb'
+  defcreds: 'admin:admin'
 
 Dell SonicWALL (Plixer) Scrutinizer:
   path1: '/d4d/statusFilter.php'
   path2: ''
   vstring: ''
   exppath: './exploits/windows/http/sonicwall_scrutinizer_sqli.rb'
+  defcreds: 'admin:admin'
 
 v0pCr3w:
   path1: '/jos.php'
   path2: ''
   vstring: ''
   exppath: './exploits/multi/http/v0pcr3w_exec.rb'
+  defcreds: 'admin:admin'
 
 Moodle:
   path1: '/moodle/'
   path2: ''
   vstring: ''
   exppath: './exploits/multi/http/moodle_cmd_exec.rb'
+  defcreds: 'admin:admin'
 
 Auxilium RateMyPet:
   path1: '/Auxiliumpetratepro/'
   path2: ''
   vstring: ''
   exppath: './exploits/multi/http/auxilium_upload_exec.rb'
+  defcreds: 'admin:admin'
 
 STUNSHELL:
   path1: '/IDC.php'
   path2: ''
   vstring: ''
   exppath: './exploits/multi/http/stunshell_eval.rb'
+  defcreds: 'admin:admin'
 
 Sflog CMS:
   path1: '/sflog/'
   path2: ''
   vstring: ''
   exppath: './exploits/multi/http/sflog_upload_exec.rb'
+  defcreds: 'admin:admin'
 
 Apache Struts:
   path1: '/struts2-blank/example/HelloWorld.action'
   path2: '/blank-struts2/login.action'
   vstring: ''
   exppath: './exploits/multi/http/struts_code_exec_classloader.rb, ./exploits/multi/http/struts_code_exec_parameters.rb, ./exploits/multi/http/struts_default_action_mapper.rb'
+  defcreds: 'admin:admin'
 
 Apache Struts:
   path1: '/blank-struts2/login.action'
   path2: ''
   vstring: ''
   exppath: './exploits/multi/http/struts_code_exec_parameters.rb'
+  defcreds: 'admin:admin'
 
 MobileCartly:
   path1: '/mobilecartly/'
   path2: ''
   vstring: ''
   exppath: './exploits/multi/http/mobilecartly_upload_exec.rb'
+  defcreds: 'admin:admin'
 
 MediaWiki:
   path1: '/mediawiki/index.php?title=Special:UserLogin&returnto=Main_Page'
   path2: ''
   vstring: ''
   exppath: './exploits/multi/http/mediawiki_thumb.rb'
+  defcreds: 'admin:password'
 
 qdPM:
   path1: '/qdPM/'
   path2: ''
   vstring: ''
   exppath: './exploits/multi/http/qdpm_upload_exec.rb'
+  defcreds: 'admin:admin'
 
 WebPageTest:
   path1: '/gettext.php'
   path2: '/work/resultimage.php'
   vstring: ''
   exppath: './exploits/multi/http/webpagetest_upload_exec.rb'
+  defcreds: 'admin:admin'
 
 GestioIP:
   path1: '/gestioip/'
   path2: ''
   vstring: ''
   exppath: './exploits/multi/http/gestioip_exec.rb'
+  defcreds: 'admin:admin'
 
 PolarBear CMS:
   path1: '/polarbearcms'
   path2: ''
   vstring: ''
   exppath: './exploits/multi/http/polarcms_upload_exec.rb'
+  defcreds: 'admin:admin'
 
 JBoss:
   path1: '/invoker/JMXInvokerServlet'
   path2: ''
   vstring: ''
   exppath: './exploits/multi/http/jboss_invoke_deploy.rb'
+  defcreds: 'admin:admin'
 
 Log1 CMS:
   path1: '/log1cms2.0/'
   path2: ''
   vstring: ''
   exppath: './exploits/multi/http/log1cms_ajax_create_folder.rb'
+  defcreds: 'admin:admin'
 
 WikkaWiki:
   path1: '/wikka/'
   path2: ''
   vstring: ''
   exppath: './exploits/multi/http/wikka_spam_exec.rb'
+  defcreds: 'admin:admin'
 
 CuteFlow:
   path1: '/cuteflow_v.2.11.2/'
   path2: ''
   vstring: ''
   exppath: './exploits/multi/http/cuteflow_upload_exec.rb'
+  defcreds: 'admin:admin'
 
 Apache Roller:
   path1: '/roller'
   path2: ''
   vstring: ''
   exppath: './exploits/multi/http/apache_roller_ognl_injection.rb'
+  defcreds: 'admin:admin'
 
 PhpTax pfilez:
   path1: '/phptax/'
   path2: ''
   vstring: ''
   exppath: './exploits/multi/http/phptax_exec.rb'
+  defcreds: 'admin:admin'
 
 AjaXplorer:
   path1: '/AjaXplorer-2.5.5/plugins/access.ssh/checkInstall.php'
   path2: ''
   vstring: ''
   exppath: './exploits/multi/http/ajaxplorer_checkinstall_exec.rb'
+  defcreds: 'admin:admin'
 
 phpMyAdmin:
   path1: '/phpmyadmin/'
   path2: ''
   vstring: ''
   exppath: './exploits/multi/http/phpmyadmin_preg_replace.rb'
+  defcreds: 'admin:admin'
 
 vTiger CRM:
   path1: '/vtigercrm/index.php?action=index&module=Home'
   path2: '/vtigercrm/index.php?module=Settings&action=ModuleManager&parenttab=Settings'
   vstring: ''
   exppath: './exploits/multi/http/vtiger_soap_upload.rb, ./exploits/multi/http/vtiger_php_exec.rb'
+  defcreds: 'admin:admin'
 
 eXtplorer:
   path1: '/com_extplorer_2.1.0/'
   path2: ''
   vstring: ''
   exppath: './exploits/multi/http/extplorer_upload_exec.rb'
+  defcreds: 'admin:admin'
 
 Splunk:
   path1: '/en-US/app/launcher/home'
   path2: '/en-US/manager/search/apps/local'
   vstring: ''
   exppath: './exploit/multi/http/splunk_upload_app_exec, http://blog.7elements.co.uk/2012/11/splunk-with-great-power-comes-great-responsibility.html'
+  defcreds: 'admin:admin'
 
 FreePBX:
   path1: '/admin/admin/config.php?type=setup&display=general'
   path2: '/admin/admin/reports.php'
   vstring: ''
   exppath: 'https://www.exploit-db.com/search/?description=freepbx'
+  defcreds: 'admin:admin'
 
 ManageEngine ServiceDesk Plus:
   path1: '/WOListView.do'
   path2: '/admin/admin/reports.php'
   vstring: '/SetUpWizard.do?forwardTo=site'
   exppath: './exploit/multi/http/manageengine_auth_upload'
+  defcreds: 'administrator:administrator'
 
 WhatsUp Gold IPSwitch:
   path1: '/NmConsole/CoreNm/User/DlgUserLogin/DlgUserLogin.asp'
   path2: '/NmConsole/Workspace/HomeWorkspace/HomeWorkspace.asp'
   vstring: 'Ipswitch WhatsUp Gold premium Edition'
   exppath: 'https://www.exploit-db.com/exploits/20035/'
+  defcreds: 'admin:admin'
 
-App_Name:
+OpenX:
   path1: '/openx/'
   path2: ''
   vstring: ''
   exppath: './exploits/multi/http/openx_backdoor_php.rb'
+  defcreds: 'admin:admin'
 
-App_Name:
+Glossword:
   path1: '/glossword/1.8/'
   path2: ''
   vstring: ''
   exppath: './exploits/multi/http/glossword_upload_exec.rb'
+  defcreds: 'admin:admin'
 
-App_Name:
+GLPI:
   path1: '/glpi/'
   path2: ''
   vstring: ''
   exppath: './exploits/multi/http/glpi_install_rce.rb'
+  defcreds: 'admin:admin'
 
-App_Name:
+Kordil EDMS:
   path1: '/kordil_edms/'
   path2: ''
   vstring: ''
   exppath: './exploits/multi/http/kordil_edms_upload_exec.rb'
+  defcreds: 'admin:admin'
 
-App_Name:
+Movable Type:
   path1: '/mt'
   path2: ''
   vstring: ''
   exppath: './exploits/multi/http/movabletype_upgrade_exec.rb'
+  defcreds: 'admin:admin'
 
 Zabbix:
   path1: '/zabbix/'
   path2: '/zabbix/scripts.php'
   vstring: ''
   exppath: './exploits/multi/http/zabbix_script_exec.rb'
+  defcreds: 'admin:admin'
 
-App_Name:
+PHP Volunteer Management System:
   path1: '/bf102/'
   path2: ''
   vstring: ''
   exppath: './exploits/multi/http/php_volunteer_upload_exec.rb'
+  defcreds: 'admin:admin'
 
-App_Name:
-  path2: '/appRain-q-0.1.5'
+appRain CMF:
+  path1: '/appRain-q-0.1.5'
   path2: ''
   vstring: ''
   exppath: './exploits/multi/http/apprain_upload_exec.rb'
+  defcreds: 'admin:admin'
 
-App_Name:
+Mutiny:
   path1: '/interface/'
   path2: ''
   vstring: ''
   exppath: './exploits/multi/http/mutiny_subnetmask_exec.rb'
+  defcreds: 'admin:admin'
 
-App_Name:
+Tiki Wiki CMS:
   path1: '/tiki/'
   path2: ''
   vstring: ''
   exppath: './exploits/unix/webapp/tikiwiki_unserialize_exec.rb'
+  defcreds: 'admin:admin'
 
-App_Name:
+Invision Power Board:
   path1: '/forums/'
   path2: ''
   vstring: ''
   exppath: './exploits/unix/webapp/invision_pboard_unserialize_exec.rb'
+  defcreds: 'admin:admin'
 
 App_Name:
   path1: '/wordpress'
   path2: ''
   vstring: ''
   exppath: './exploits/unix/webapp/wp_property_upload_exec.rb, ./exploits/unix/webapp/wp_asset_manager_upload_exec.rb'
+  defcreds: 'admin:admin'
 
-App_Name:
+Zimbra Admin:
   path1: '/zimbraAdmin'
   path2: ''
   vstring: ''
   exppath: './exploits/unix/webapp/zimbra_lfi.rb'
+  defcreds: 'admin:admin'
 
-App_Name:
+Nagios3:
   path1: '/nagios3/cgi-bin/history.cgi'
   path2: ''
   vstring: ''
   exppath: './exploits/unix/webapp/nagios3_history_cgi.rb'
+  defcreds: 'admin:admin'
 
-App_Name:
+PHP-Charts:
   path1: '/php-charts_v1.0/'
   path2: ''
   vstring: ''
   exppath: './exploits/unix/webapp/php_charts_exec.rb'
+  defcreds: 'admin:admin'
 
-App_Name:
+Open Flash Chart v2:
   path1: '/php-ofc-library/'
   path2: ''
   vstring: ''
   exppath: './exploits/unix/webapp/open_flash_chart_upload_exec.rb'
+  defcreds: 'admin:admin'
 
-App_Name:
+LibrettoCMS File Manager:
   path1: '/librettoCMS_v.2.2.2/'
   path2: ''
   vstring: ''
   exppath: './exploits/unix/webapp/libretto_upload_exec.rb'
+  defcreds: 'admin:admin'
 
-App_Name:
+Horde Framework:
   path1: '/horde/'
   path2: ''
   vstring: ''
   exppath: './exploits/unix/webapp/horde_unserialize_exec.rb'
+  defcreds: 'admin:admin'
 
-App_Name:
+XODA:
   path1: '/xoda/'
   path2: ''
   vstring: ''
   exppath: './exploits/unix/webapp/xoda_file_upload.rb'
+  defcreds: 'admin:admin'
 
-App_Name:
+ZoneMinder Video Server:
   path1: '/zm/'
   path2: ''
   vstring: ''
   exppath: './exploits/unix/webapp/zoneminder_packagecontrol_exec.rb'
+  defcreds: 'admin:admin'
 
-App_Name:
+SePortal:
   path1: '/seportal'
   path2: ''
   vstring: ''
   exppath: './exploits/unix/webapp/seportal_sqli_exec.rb'
+  defcreds: 'admin:admin'
 
-App_Name:
+WebTester:
   path1: '/webtester5/'
   path2: ''
   vstring: ''
   exppath: './exploits/unix/webapp/webtester_exec.rb'
+  defcreds: 'admin:admin'
 
-App_Name:
+Hastymail:
   path1: '/hastymail2/'
   path2: ''
   vstring: ''
   exppath: './exploits/unix/webapp/hastymail_exec.rb'
+  defcreds: 'admin:admin'
 
-App_Name:
+Joomla:
   path1: '/joomla'
   path2: ''
   vstring: ''
   exppath: './exploits/unix/webapp/joomla_media_upload_exec.rb'
+  defcreds: 'admin:admin'
 
-App_Name:
+Kimai Time Tracking:
   path1: '/kimai/'
   path2: ''
   vstring: ''
   exppath: './exploits/unix/webapp/kimai_sqli.rb'
+  defcreds: 'admin:admin'
 
-App_Name:
+FlashChat:
   path1: '/chat/'
   path2: ''
   vstring: ''
   exppath: './exploits/unix/webapp/flashchat_upload_exec.rb'
+  defcreds: 'admin:admin'
 
-App_Name:
+Simple E-Document:
   path1: '/simple_e_document_v_1_31/'
   path2: ''
   vstring: ''
   exppath: './exploits/unix/webapp/simple_e_document_upload_exec.rb'
+  defcreds: 'admin:admin'
 
-App_Name:
+EGallery:
   path1: '/sample'
   path2: ''
   vstring: ''
   exppath: './exploits/unix/webapp/egallery_upload_exec.rb'
+  defcreds: 'admin:admin'
 
-App_Name:
+OpenEMR:
   path1: '/openemr'
   path2: ''
   vstring: ''
   exppath: './exploits/unix/webapp/openemr_upload_exec.rb, ./exploits/unix/webapp/openemr_sqli_privesc_upload.rb'
+  defcreds: 'admin:admin'
 
-App_Name:
+Basilic:
   path1: '/basilic-1.5.14/'
   path2: ''
   vstring: ''
   exppath: './exploits/unix/webapp/basilic_diff_exec.rb'
+  defcreds: 'admin:admin'
 
-App_Name:
+Narcissus:
   path1: '/narcissus-master/'
   path2: ''
   vstring: ''
   exppath: './exploits/unix/webapp/narcissus_backend_exec.rb'
+  defcreds: 'admin:admin'
 
-App_Name:
+Project Pier:
   path1: '/pp088/'
   path2: ''
   vstring: ''
   exppath: './exploits/unix/webapp/projectpier_upload_exec.rb'
+  defcreds: 'admin:admin'
 
-App_Name:
+OpenSIS:
   path1: '/opensis/'
   path2: ''
   vstring: ''
   exppath: './exploits/unix/webapp/opensis_modname_exec.rb'
+  defcreds: 'admin:admin'
 
-App_Name:
+V-CMS:
   path1: '/vcms/'
   path2: ''
   vstring: ''
   exppath: './exploits/linux/http/vcms_upload.rb'
+  defcreds: 'admin:admin'
 
-App_Name:
+Zabbix:
   path1: '/zabbix'
   path2: ''
   vstring: ''
   exppath: './exploits/linux/http/zabbix_sqli.rb'
+  defcreds: 'admin:zabbix'
 
-App_Name:
+WebCalendar:
   path1: '/WebCalendar-1.2.4/'
   path2: ''
   vstring: ''
   exppath: './exploits/linux/http/webcalendar_settings_exec.rb'
+  defcreds: 'admin:admin'
 
-App_Name:
+Symantec Web Gateway:
   path1: '/spywall/pbcontrol.php'
   path2: ''
   vstring: ''
   exppath: './exploits/linux/http/symantec_web_gateway_pbcontrol.rb'
+  defcreds: 'admin:admin'
 
-App_Name:
+WeBid:
   path1: '/WeBid'
   path2: ''
   vstring: ''
   exppath: './exploits/linux/http/webid_converter.rb'
+  defcreds: 'admin:admin'
 
-App_Name:
+DoliWamp:
   path1: '/dolibarr/'
   path2: ''
   vstring: ''
   exppath: './exploits/linux/http/dolibarr_cmd_exec.rb, ./auxiliary/gather/doliwamp_traversal_creds.rb'
+  defcreds: 'admin:admin'
 
-App_Name:
+Ruby on Rails Devise:
   path1: '/users/password'
   path2: ''
   vstring: ''
   exppath: './auxiliary/admin/http/rails_devise_pass_reset.rb'
+  defcreds: 'admin:admin'
 
-App_Name:
+Linksys WRT54GL:
   path1: '/apply.cgi'
   path2: ''
   vstring: ''
   exppath: './auxiliary/admin/http/linksys_wrt54gl_exec.rb'
+  defcreds: 'admin:admin'
 
-App_Name:
+JBoss Seam 2:
   path1: '/seam-booking/home.seam'
   path2: ''
   vstring: ''
   exppath: './auxiliary/admin/http/jboss_seam_exec.rb'
+  defcreds: 'admin:admin'
 
-App_Name:
+Plixer Scrutinizer NetFlow:
   path1: '/cgi-bin/admin.cgi'
   path2: ''
   vstring: ''
   exppath: './auxiliary/admin/http/scrutinizer_add_user.rb'
+  defcreds: 'admin:admin'
 
-App_Name:
+Openbravo ERP:
   path1: '/openbravo/'
   path2: ''
   vstring: ''
   exppath: './auxiliary/admin/http/openbravo_xxe.rb'
+  defcreds: 'admin:admin'
 
-App_Name:
+Advantech WebAccess:
   path1: '/BEMS'
   path2: ''
   vstring: ''
   exppath: './auxiliary/admin/scada/advantech_webaccess_dbvisitor_sqli.rb'
+  defcreds: 'admin:admin'
 
-App_Name:
+GE Proficy Cimplicity WebView:
   path1: '/CimWeb'
   path2: ''
   vstring: ''
   exppath: './auxiliary/admin/scada/ge_proficy_substitute_traversal.rb'
+  defcreds: 'admin:admin'
 
-App_Name:
+Cisco Secure ACS:
   path1: '/PI/services/UCP/'
   path2: ''
   vstring: ''
   exppath: './auxiliary/admin/cisco/cisco_secure_acs_bypass.rb'
+  defcreds: 'admin:admin'
 
-App_Name:
+CouchDB:
   path1: '/_all_dbs'
   path2: ''
   vstring: ''
   exppath: './auxiliary/scanner/couchdb/couchdb_enum.rb'
+  defcreds: 'admin:admin'
 
-App_Name:
+SAP SOAP Service:
   path1: '/sap/bc/soap/rfc'
   path2: ''
   vstring: ''
   exppath: './auxiliary/scanner/sap/sap_soap_rfc_brute_login.rb'
+  defcreds: 'admin:admin'
 
-App_Name:
+Apache ActiveMQ:
   path1: '/admin/index.jsp'
   path2: ''
   vstring: ''
   exppath: './auxiliary/scanner/http/apache_activemq_source_disclosure.rb'
+  defcreds: 'admin:admin'
 
-App_Name:
+SVN:
   path1: '/.svn/'
   path2: ''
   vstring: ''
   exppath: './auxiliary/scanner/http/svn_wcdb_scanner.rb'
+  defcreds: 'admin:admin'
 
-App_Name:
+Bitweaver:
   path1: '/bitweaver/'
   path2: ''
   vstring: ''
   exppath: './auxiliary/scanner/http/bitweaver_overlay_type_traversal.rb'
+  defcreds: 'admin:admin'
 
-App_Name:
+Dell iDRAC:
   path1: '/data/login'
   path2: ''
   vstring: ''
   exppath: './auxiliary/scanner/http/dell_idrac.rb'
+  defcreds: 'admin:admin'
 
-App_Name:
+JBoss Status Servlet:
   path1: '/status'
   path2: ''
   vstring: ''
   exppath: './auxiliary/scanner/http/jboss_status.rb'
+  defcreds: 'admin:admin'
 
-App_Name:
+OpenMind Message-OS Portal:
   path1: '/provision/index.php'
   path2: ''
   vstring: ''
   exppath: './auxiliary/scanner/http/openmind_messageos_login.rb'
+  defcreds: 'admin:admin'
 
-App_Name:
+ClanSphere:
   path1: '/clansphere_2011.3/'
   path2: ''
   vstring: ''
   exppath: './auxiliary/scanner/http/clansphere_traversal.rb'
+  defcreds: 'admin:admin'
 
-App_Name:
+InfoVista VistaPortal Application:
   path1: '/VPortal/mgtconsole/CheckPassword.jsp'
   path2: ''
   vstring: ''
   exppath: './auxiliary/scanner/http/infovista_enum.rb'
+  defcreds: 'admin:admin'
 
-App_Name:
+Atlassian Crowd:
   path1: '/crowd/services'
   path2: ''
   vstring: ''
   exppath: './auxiliary/scanner/http/atlassian_crowd_fileaccess.rb'
+  defcreds: 'admin:admin'
 
-App_Name:
+S40 CMS:
   path1: '/s40/'
   path2: ''
   vstring: ''
   exppath: './auxiliary/scanner/http/s40_traversal.rb'
+  defcreds: 'admin:admin'
 
-App_Name:
+MyBB:
   path1: '/forum'
   path2: ''
   vstring: ''
   exppath: './auxiliary/gather/mybb_db_fingerprint.rb'
+  defcreds: 'admin:admin'
 
-App_Name:
+IBM Lotus Notes:
   path1: '/userinfo/search'
   path2: ''
   vstring: ''
   exppath: './auxiliary/gather/ibm_sametime_enumerate_users.rb'
+  defcreds: 'admin:admin'
 
-App_Name:
+Apache Rave:
   path1: '/portal'
   path2: ''
   vstring: ''
   exppath: './auxiliary/gather/apache_rave_creds.rb'
+  defcreds: 'admin:admin'
 
-App_Name:
+Drupal OpenID:
   path1: '/drupal'
   path2: ''
   vstring: ''
   exppath: './auxiliary/gather/drupal_openid_xxe.rb'
+  defcreds: 'admin:admin'
 
 Symantec Endpoint Protection Manager:
   path1: '/servlet/ConsoleServlet'
   path2: ''
   vstring: ''
   exppath: '/exploits/windows/http/sepm_auth_bypass_rce'
+  defcreds: 'admin:admin'
 
 Panasonic Network Camera WV-SF335:
   path1: '/live/index.html?Language=0'
   path2: '/admin/index.html?Language=0'
   vstring: ''
   exppath: 'Unauthenticate access to LIVE video feed'
+  defcreds: 'admin:admin'
 
 AXIS Q7404 Video Encoder:
   path1: '/view/viewer_index.shtml'
   path2: '/operator/action_rules.shtml'
   vstring: ''
   exppath: 'Unauthenticate access to LIVE video feed'
+  defcreds: 'admin:admin'
 
 Vivotek Mega-Pixel Network Camera:
   path1: '/setup/system/system.html'
   path2: '/media/media_settings.html'
   vstring: ''
   exppath: 'Unauthenticate access to LIVE video feed'
+  defcreds: 'admin:admin'
 
 SVSi N-Command N8002:
   path1: '/userAdmin.php'
   path2: ''
   vstring: ''
   exppath: 'Unauthenticate access to LIVE video feed'
+  defcreds: 'admin:admin'
 
 SVSi N-Series 2000 Decoder:
   path1: '/localplay.php'
   path2: '/edid.php'
   vstring: ''
   exppath: 'Unauthenticate access to LIVE video feed'
+  defcreds: 'admin:admin'
 
 AlienVault USM:
   path1: '/ossim/session/login.php'
   path2: '/ossim/#configuration/administration/users'
   vstring: ''
   exppath: 'https://www.exploit-db.com/search/?text=alienvault'
+  defcreds: 'admin:admin'
 
 Arecont Vision Mega Pixel Panoramic Camera:
   path1: '/livevideo.html'
   path2: ''
   vstring: 'dinapage'
   exppath: 'Unauthenticate access to LIVE video feed'
+  defcreds: 'admin:admin'

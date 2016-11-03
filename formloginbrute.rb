@@ -25,10 +25,11 @@ module LoginFormBruteForcer
   end
 
   # Attempts to bruteforce a login to supplied url.
-  def brute_by_force(url)
+  def brute_by_force(url,dcreds)
     login_agent = Mechanize.new { |agent| agent.user_agent_alias = 'Mac Safari' }
     login_agent.verify_mode = OpenSSL::SSL::VERIFY_NONE
     login_agent.follow_meta_refresh = true
+    #login_agent.set_proxy("localhost", 8080)    #To send login request through a proxy. Mostly for debugging.
 
     login_form = login_agent.get(url).form(:name => /login/)
 
@@ -36,22 +37,59 @@ module LoginFormBruteForcer
     # not exist. The checks in Yasuo.rb are weak.
     if not login_form
       $logboth.info("Login page not found. Looks like this instance maybe unauthenticated")
-      return "", ""
+      return "<None>", "<None>"
     end
 
     username_field = login_form.field_with(name: /user|email|login|REGEMAIL|name/i)
     password_field = login_form.field_with(name: /pass|pwd|REGCODE/i)
+    if not username_field
+      $logboth.warn ("[+] Could not enumerate the username field, moving on. You should check it manually")
+      puts ("[+] Could not enumerate the username field, moving on. You should check it manually").red
+      username = "<Check Manually>"
+      password = "<Check Manually>"
+      return username, password
+    end
+
+    #Smart brute-force code starts here
+    username = dcreds.split(':')[0].chomp
+    password = dcreds.split(':')[1].chomp
+    username_field.value = username
+    password_field.value = password
+
+    begin
+      $logfile.info("Trying app-specific default creds first -> #{dcreds}")
+      puts ("[+] Trying app-specific default creds first -> #{dcreds}\n").green
+
+      login_request = login_form.submit
+      #puts login_request.body   #To print server response. Mostly for debugging.
+
+      sleep 0.5
+
+      # we determine if we have logged in by looking to see if we are on
+      # a page with the login form.
+      if (!login_request.form_with(:name => 'login') and
+          login_request.body.scan(/"#{username_field.name}"/i).empty? and
+          login_request.body.scan(/"#{username_field.name}"/i).empty?)
+        puts "[+] Yatta, found default login credentials for #{url} - #{username}:#{password}\n".green
+        $logfile.info("[+] Yatta, found default login credentials for #{url} - #{username} / #{password}")
+        return username, password
+      end
+    rescue Mechanize::ResponseCodeError => exception
+      if (exception.response_code != '200' or
+          exception.response_code != '301' or
+          exception.response_code != '302')
+        # These response codes are handled by Mechanize
+        login_request = exception.page
+        $logfile.warn("Invalid credentials or user does not have sufficient privileges")
+      else
+        $logboth.info("Unknown server error")
+      end
+    end
+    #Smart brute-force code ends here    
 
     usernames_and_passwords.each do |user, pass|
       username = user.chomp
       password = pass.chomp
-
-      if not username_field
-        $logboth.warn ("[+] Could not enumerate the username field, moving on. You should check it manually")
-        username = "<Check Manually>"
-        password = "<Check Manually>"
-        return username, password
-      end
 
       username_field.value = username
       password_field.value = password
@@ -65,7 +103,7 @@ module LoginFormBruteForcer
 
         # we determine if we have logged in by looking to see if we are on
         # a page with the login form.
-        if (login_request.body.scan(/"#{login_form.name}"/i).empty? and
+        if (!login_request.form_with(:name => 'login') and
             login_request.body.scan(/"#{username_field.name}"/i).empty? and
             login_request.body.scan(/"#{username_field.name}"/i).empty?)
           puts "[+] Yatta, found default login credentials for #{url} - #{username} / #{password}\n".green
@@ -78,7 +116,7 @@ module LoginFormBruteForcer
             exception.response_code != '302')
           # These response codes are handled by Mechanize
           login_request = exception.page
-          $logboth.warn("Invalid credentials or user does not have sufficient privileges")
+          $logfile.warn("Invalid credentials or user does not have sufficient privileges")
         else
           $logboth.info("Unknown server error")
         end
@@ -90,4 +128,3 @@ module LoginFormBruteForcer
     return "Not Found", "Not Found"
   end
 end
-

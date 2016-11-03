@@ -1,5 +1,6 @@
 manager
 admin
+jenkins
 role1
 root
 tomcat
