@@ -27,7 +27,9 @@ thus serving pwnable targets on a silver platter.
 ## Setup / Install
 You would need to install the following gems:
 
-- gem install ruby-nmap net-http-persistent mechanize text-table sqlite3
+- bundle install --path vendor
+
+- bundler exec ./yasuo.rb -f [myfile] 
 
 ## Details
 

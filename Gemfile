@@ -1,0 +1,7 @@
+source 'https://rubygems.org'
+gem 'ruby-nmap'
+gem 'net-http-persistent'
+gem 'mechanize'
+gem 'text-table'
+gem 'sqlite3'
+gem 'iconv'
